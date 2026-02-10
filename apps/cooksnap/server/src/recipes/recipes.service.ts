@@ -34,24 +34,31 @@ export class RecipesService {
       return { id: existing.id };
     }
 
-    // 1. 영상 다운로드
+    const platform = detectPlatform(url);
+    const isYoutube = platform === 'youtube';
+
+    // YouTube → URL 직접 분석, 그 외 → yt-dlp 다운로드 후 파일 분석
+    let geminiResult;
     let videoPath: string | null = null;
 
     try {
-      videoPath = await this.videoService.download(url);
-
-      // 2. Gemini로 영상 파일 분석 (멀티모달)
-      const geminiResult = await this.geminiService.analyzeVideo(videoPath);
+      if (isYoutube) {
+        this.logger.log(`YouTube URL 직접 분석: ${url}`);
+        geminiResult = await this.geminiService.analyzeVideoUrl(url);
+      } else {
+        videoPath = await this.videoService.download(url);
+        geminiResult = await this.geminiService.analyzeVideo(videoPath);
+      }
 
       if (!geminiResult.title || !geminiResult.ingredients?.length) {
         throw new BadRequestException('영상에서 레시피를 추출할 수 없습니다.');
       }
 
-      // 3. 트랜잭션으로 Recipe + Ingredients + Steps 일괄 생성
+      // 트랜잭션으로 Recipe + Ingredients + Steps 일괄 생성
       const recipe = await this.prisma.recipe.create({
         data: {
           videoUrl: url,
-          videoPlatform: detectPlatform(url),
+          videoPlatform: platform,
           title: geminiResult.title,
           difficulty: geminiResult.difficulty || null,
           cookTime: geminiResult.cookTime || null,
@@ -78,7 +85,6 @@ export class RecipesService {
 
       return { id: recipe.id };
     } finally {
-      // 4. 임시 영상 파일 정리
       if (videoPath) {
         this.videoService.cleanup(videoPath);
       }

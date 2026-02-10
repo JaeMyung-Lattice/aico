@@ -103,25 +103,7 @@ export class GeminiService {
     return file.uri;
   };
 
-  // 영상 파일로 레시피 분석 (멀티모달)
-  analyzeVideo = async (videoFilePath: string): Promise<GeminiRecipeResult> => {
-    if (!this.genAI) {
-      throw new Error('Gemini API key가 설정되지 않았습니다.');
-    }
-
-    // 1. 영상을 Gemini File API에 업로드
-    const fileUri = await this.uploadVideo(videoFilePath);
-
-    // 2. 멀티모달 모델로 영상 분석
-    const model = this.genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: recipeResponseSchema,
-      },
-    });
-
-    const prompt = `당신은 요리 전문가입니다. 이 요리 영상을 시청하고 레시피를 추출하세요.
+  private readonly recipePrompt = `당신은 요리 전문가입니다. 이 요리 영상을 시청하고 레시피를 추출하세요.
 
 다음을 추출하세요:
 1. 요리 이름 (한국어)
@@ -135,6 +117,55 @@ export class GeminiService {
 재료의 양이 명확하지 않으면 최선의 추정치를 제공하세요.
 모든 텍스트는 한국어로 작성하세요.`;
 
+  private getModel = () => {
+    if (!this.genAI) {
+      throw new Error('Gemini API key가 설정되지 않았습니다.');
+    }
+    return this.genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: recipeResponseSchema,
+      },
+    });
+  };
+
+  // YouTube URL 직접 분석 (다운로드 불필요)
+  analyzeVideoUrl = async (videoUrl: string): Promise<GeminiRecipeResult> => {
+    const model = this.getModel();
+
+    this.logger.log(`YouTube URL 직접 분석: ${videoUrl}`);
+
+    try {
+      const result = await model.generateContent([
+        {
+          fileData: {
+            mimeType: 'video/mp4',
+            fileUri: videoUrl,
+          },
+        },
+        { text: this.recipePrompt },
+      ]);
+      const text = result.response.text();
+
+      this.logger.log('Gemini YouTube URL 분석 완료');
+
+      return JSON.parse(text) as GeminiRecipeResult;
+    } catch (error) {
+      this.logger.error('Gemini YouTube URL 분석 실패', error);
+      throw new Error('YouTube 영상 분석에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  // 영상 파일로 레시피 분석 (멀티모달)
+  analyzeVideo = async (videoFilePath: string): Promise<GeminiRecipeResult> => {
+    const model = this.getModel();
+
+    // 1. 영상을 Gemini File API에 업로드
+    const fileUri = await this.uploadVideo(videoFilePath);
+
+    this.logger.log('Gemini 멀티모달 영상 분석 시작');
+
     try {
       const result = await model.generateContent([
         {
@@ -143,10 +174,9 @@ export class GeminiService {
             fileUri,
           },
         },
-        { text: prompt },
+        { text: this.recipePrompt },
       ]);
-      const response = result.response;
-      const text = response.text();
+      const text = result.response.text();
 
       this.logger.log('Gemini 멀티모달 분석 완료');
 
