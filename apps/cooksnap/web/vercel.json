@@ -1,6 +1,6 @@
 {
   "installCommand": "cd ../../.. && pnpm install",
-  "buildCommand": "cd ../../.. && pnpm --filter @cooksnap/web run build",
+  "buildCommand": "vite build",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
