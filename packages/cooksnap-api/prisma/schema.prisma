@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String
+  nickname   String?
+  provider   String   // "kakao" | "google"
+  providerId String   @map("provider_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  savedRecipes    SavedRecipe[]
+  analysisHistory AnalysisHistory[]
+
+  @@unique([provider, providerId])
+  @@map("users")
+}
+
+model Recipe {
+  id               String   @id @default(uuid())
+  videoUrl         String   @map("video_url")
+  videoPlatform    String   @map("video_platform") // "instagram" | "tiktok" | "youtube"
+  title            String
+  difficulty       String?  // "easy" | "medium" | "hard"
+  cookTime         Int?     @map("cook_time")
+  servings         Int?
+  totalPrice       Int?     @map("total_price")
+  avgEatOutPrice   Int?     @map("avg_eat_out_price")
+  savingsPercent   Int?     @map("savings_percent")
+  thumbnailUrl     String?  @map("thumbnail_url")
+  geminiRawResponse Json?   @map("gemini_raw_response")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  ingredients     Ingredient[]
+  steps           Step[]
+  savedRecipes    SavedRecipe[]
+  analysisHistory AnalysisHistory[]
+
+  @@map("recipes")
+}
+
+model Ingredient {
+  id                String  @id @default(uuid())
+  recipeId          String  @map("recipe_id")
+  name              String
+  amount            String?
+  unit              String?
+  estimatedPrice    Int?    @map("estimated_price")
+  kamisItemCode     String? @map("kamis_item_code")
+  coupangProductUrl String? @map("coupang_product_url")
+  sortOrder         Int     @default(0) @map("sort_order")
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("ingredients")
+}
+
+model Step {
+  id          String @id @default(uuid())
+  recipeId    String @map("recipe_id")
+  stepOrder   Int    @map("step_order")
+  description String
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("steps")
+}
+
+model SavedRecipe {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  recipeId  String   @map("recipe_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
+  @@map("saved_recipes")
+}
+
+model AnalysisHistory {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  recipeId  String   @map("recipe_id")
+  videoUrl  String   @map("video_url")
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("analysis_history")
+}

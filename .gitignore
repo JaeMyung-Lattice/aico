@@ -36,3 +36,13 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# yt-dlp binary
+packages/cooksnap-api/yt-dlp
+
+# Downloaded videos (temp)
+packages/cooksnap-api/tmp/
+
+# claude
+.claude
+.opencode

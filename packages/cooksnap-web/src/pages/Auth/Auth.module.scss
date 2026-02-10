@@ -1,0 +1,74 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.auth {
+  @include flex-center;
+  min-height: calc(100vh - 56px);
+  padding: $spacing-xl;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background-color: $surface;
+  border-radius: $radius-lg;
+  padding: $spacing-xxl $spacing-xl;
+  box-shadow: $shadow-md;
+  text-align: center;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: $spacing-sm;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: $text-secondary;
+  margin-bottom: $spacing-xl;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.socialButton {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  width: 100%;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  font-size: 15px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.kakaoButton {
+  background-color: #fee500;
+  color: #191919;
+}
+
+.googleButton {
+  background-color: $surface;
+  color: $text-primary;
+  border: 1px solid $border;
+}
+
+.freeNotice {
+  margin-top: $spacing-xl;
+  padding: $spacing-md;
+  background-color: $background;
+  border-radius: $radius-md;
+  font-size: 13px;
+  color: $text-secondary;
+}

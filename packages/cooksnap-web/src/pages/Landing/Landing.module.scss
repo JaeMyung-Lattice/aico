@@ -1,0 +1,217 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.landing {
+  @include container;
+  padding-top: $spacing-xxl * 2;
+  padding-bottom: $spacing-xxl;
+  text-align: center;
+
+  @include tablet {
+    padding-top: $spacing-xxl;
+  }
+}
+
+.headline {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: $spacing-md;
+  color: $text-primary;
+
+  @include tablet {
+    font-size: 28px;
+  }
+}
+
+.subheadline {
+  font-size: 18px;
+  color: $text-secondary;
+  margin-bottom: $spacing-xl;
+
+  @include tablet {
+    font-size: 15px;
+  }
+}
+
+.inputSection {
+  max-width: 640px;
+  margin: 0 auto $spacing-xxl;
+}
+
+.inputWrapper {
+  display: flex;
+  gap: $spacing-sm;
+  background-color: $surface;
+  border: 2px solid $border;
+  border-radius: $radius-lg;
+  padding: $spacing-sm;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: $primary;
+  }
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+.urlInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: $spacing-sm $spacing-md;
+  font-size: 16px;
+  background: transparent;
+  color: $text-primary;
+
+  &::placeholder {
+    color: $text-secondary;
+  }
+}
+
+.analyzeButton {
+  @include button-reset;
+  padding: $spacing-sm $spacing-xl;
+  background-color: $primary;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: $radius-md;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: $primary-dark;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// 분석 로딩 오버레이
+.loadingOverlay {
+  @include flex-center;
+  flex-direction: column;
+  min-height: calc(100vh - 56px - $spacing-xxl * 2);
+  gap: $spacing-lg;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid $border;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingMessage {
+  font-size: 20px;
+  font-weight: 700;
+  color: $text-primary;
+  animation: fadeIn 0.5s ease;
+
+  @include tablet {
+    font-size: 17px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loadingSteps {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.loadingStepDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: $border;
+  transition: background-color 0.4s ease;
+
+  &.active {
+    background-color: $primary;
+  }
+}
+
+.loadingHint {
+  font-size: 14px;
+  color: $text-secondary;
+  margin-top: $spacing-sm;
+}
+
+.platforms {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xxl;
+
+  @include mobile {
+    gap: $spacing-sm;
+  }
+}
+
+.platformBadge {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-md;
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-full;
+  font-size: 13px;
+  color: $text-secondary;
+}
+
+.errorMessage {
+  color: $error;
+  font-size: 14px;
+  margin-top: $spacing-sm;
+  text-align: left;
+  padding-left: $spacing-md;
+}
+
+.valueCard {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+  background-color: $surface;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+}
+
+.valueTitle {
+  font-size: 14px;
+  color: $text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.valueHighlight {
+  font-size: 24px;
+  font-weight: 800;
+  color: $primary;
+
+  @include tablet {
+    font-size: 20px;
+  }
+}

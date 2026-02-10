@@ -1,0 +1,222 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.result {
+  @include container;
+  padding-top: $spacing-xl;
+  padding-bottom: 100px; // sticky 버튼 여백
+
+  @include mobile {
+    padding-top: $spacing-md;
+  }
+}
+
+.loading {
+  @include flex-center;
+  min-height: 400px;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.loadingText {
+  color: $text-secondary;
+  font-size: 16px;
+}
+
+.error {
+  @include flex-center;
+  min-height: 400px;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.errorText {
+  color: $error;
+  font-size: 16px;
+}
+
+.retryButton {
+  @include button-reset;
+  padding: $spacing-sm $spacing-lg;
+  background-color: $primary;
+  color: #fff;
+  border-radius: $radius-md;
+  font-weight: 600;
+}
+
+.header {
+  margin-bottom: $spacing-xl;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: $spacing-sm;
+
+  @include tablet {
+    font-size: 22px;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm $spacing-md;
+  color: $text-secondary;
+  font-size: 14px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.priceCard {
+  background-color: $primary;
+  color: #fff;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  text-align: center;
+}
+
+.totalPrice {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: $spacing-xs;
+
+  @include tablet {
+    font-size: 24px;
+  }
+}
+
+.savings {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.section {
+  margin-bottom: $spacing-xl;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 2px solid $border;
+
+  @include mobile {
+    font-size: 18px;
+  }
+}
+
+.ingredientList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.ingredientItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background-color: $surface;
+  border-radius: $radius-md;
+  border: 1px solid $border;
+
+  @include mobile {
+    padding: $spacing-sm $spacing-md;
+  }
+}
+
+.ingredientName {
+  font-weight: 600;
+}
+
+.ingredientAmount {
+  color: $text-secondary;
+  font-size: 14px;
+}
+
+.ingredientPrice {
+  font-weight: 700;
+  color: $primary;
+}
+
+.stepList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.stepItem {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background-color: $surface;
+  border-radius: $radius-md;
+  border: 1px solid $border;
+
+  @include mobile {
+    gap: $spacing-sm;
+  }
+}
+
+.stepNumber {
+  @include flex-center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  background-color: $primary;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+
+  @include mobile {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: 12px;
+  }
+}
+
+.stepDescription {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.stickyBottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md;
+  background-color: $surface;
+  border-top: 1px solid $border;
+  box-shadow: $shadow-lg;
+  z-index: 50;
+}
+
+.cartButton {
+  @include button-reset;
+  display: block;
+  width: 100%;
+  max-width: $wide;
+  margin: 0 auto;
+  padding: $spacing-md;
+  background-color: $primary;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: $radius-md;
+  text-align: center;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: $primary-dark;
+  }
+}

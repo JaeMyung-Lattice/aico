@@ -1,0 +1,157 @@
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import classnames from 'classnames/bind'
+import api from '@/lib/api'
+import type { AnalyzeResponse } from '@/types/recipe'
+import styles from './Landing.module.scss'
+
+const cx = classnames.bind(styles)
+
+// 지원 플랫폼 URL 패턴
+const VIDEO_URL_PATTERNS: Record<string, RegExp> = {
+  instagram: /^https?:\/\/(www\.)?instagram\.com\/reels?\//,
+  tiktok: /^https?:\/\/(www\.)?(tiktok\.com|vm\.tiktok\.com)\//,
+  youtube: /^https?:\/\/(www\.)?(youtube\.com\/shorts|youtu\.be)\//,
+}
+
+const validateVideoUrl = (url: string): boolean => {
+  return Object.values(VIDEO_URL_PATTERNS).some((pattern) => pattern.test(url))
+}
+
+const LOADING_STEPS = [
+  '영상을 다운로드하고 있어요',
+  'AI가 영상을 분석하고 있어요',
+  '레시피를 추출하고 있어요',
+  '재료 정보를 정리하고 있어요',
+]
+
+const Landing = () => {
+  const navigate = useNavigate()
+  const [url, setUrl] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoadingStep(0)
+      intervalRef.current = setInterval(() => {
+        setLoadingStep((prev) =>
+          prev < LOADING_STEPS.length - 1 ? prev + 1 : prev
+        )
+      }, 8000)
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [isLoading])
+
+  const handleAnalyze = async () => {
+    setError('')
+
+    if (!url.trim()) {
+      setError('영상 URL을 입력해주세요.')
+      return
+    }
+
+    if (!validateVideoUrl(url.trim())) {
+      setError('Instagram Reels, TikTok, YouTube Shorts URL만 지원합니다.')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const { data } = await api.post<AnalyzeResponse>('/recipes/analyze', { url: url.trim() })
+      navigate(`/result/${data.id}`)
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = (err as any)?.response?.data?.message || '분석 중 오류가 발생했습니다. 다시 시도해주세요.'
+      setError(message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isLoading) {
+      handleAnalyze()
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className={cx('landing')}>
+        <div className={cx('loadingOverlay')}>
+          <div className={cx('spinner')} />
+          <p className={cx('loadingMessage')}>{LOADING_STEPS[loadingStep]}</p>
+          <div className={cx('loadingSteps')}>
+            {LOADING_STEPS.map((_, i) => (
+              <div
+                key={i}
+                className={cx('loadingStepDot', { active: i <= loadingStep })}
+              />
+            ))}
+          </div>
+          <p className={cx('loadingHint')}>약 30초~1분 정도 소요됩니다</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={cx('landing')}>
+      <h1 className={cx('headline')}>
+        영상 붙여넣으면,
+        <br />
+        재료비부터 주문까지
+      </h1>
+      <p className={cx('subheadline')}>
+        숏폼 레시피 영상 URL 하나로 레시피 + 재료 + 가격 + 주문까지 원스톱
+      </p>
+
+      <div className={cx('inputSection')}>
+        <div className={cx('inputWrapper')}>
+          <input
+            className={cx('urlInput')}
+            type="url"
+            placeholder="레시피 영상 URL을 붙여넣으세요"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+          />
+          <button
+            className={cx('analyzeButton')}
+            onClick={handleAnalyze}
+            disabled={isLoading}
+          >
+            분석하기
+          </button>
+        </div>
+        {error && <p className={cx('errorMessage')}>{error}</p>}
+      </div>
+
+      <div className={cx('platforms')}>
+        <span className={cx('platformBadge')}>Instagram Reels</span>
+        <span className={cx('platformBadge')}>TikTok</span>
+        <span className={cx('platformBadge')}>YouTube Shorts</span>
+      </div>
+
+      <div className={cx('valueCard')}>
+        <p className={cx('valueTitle')}>핵심 가치</p>
+        <p className={cx('valueHighlight')}>
+          "이 레시피, 재료비 총 4,200원 — 외식비 대비 62% 절약"
+        </p>
+      </div>
+    </div>
+  )
+}
+
+export default Landing

@@ -1,0 +1,49 @@
+@use 'variables' as *;
+
+@mixin mobile {
+  @media (max-width: $mobile) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: $tablet) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: $tablet + 1px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $desktop) {
+    @content;
+  }
+}
+
+@mixin container {
+  max-width: $wide;
+  margin: 0 auto;
+  padding: 0 $spacing-md;
+
+  @include tablet {
+    padding: 0 $spacing-md;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin button-reset {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}

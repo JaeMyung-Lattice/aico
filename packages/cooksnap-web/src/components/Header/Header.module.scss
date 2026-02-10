@@ -1,0 +1,63 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: $surface;
+  border-bottom: 1px solid $border;
+  height: 56px;
+}
+
+.inner {
+  @include container;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: $primary;
+  cursor: pointer;
+
+  span {
+    color: $text-primary;
+  }
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.loginButton {
+  @include button-reset;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-full;
+  background-color: $primary;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: $primary-dark;
+  }
+}
+
+.profileButton {
+  @include button-reset;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: $primary-light;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  @include flex-center;
+}
