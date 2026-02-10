@@ -1,5 +1,7 @@
 {
   "installCommand": "cd ../../.. && pnpm install",
+  "buildCommand": "cd ../../.. && pnpm turbo run build --filter=@cooksnap/web",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]
