@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd ../../.. && pnpm install",
+  "installCommand": "rm -rf node_modules && cd ../../.. && rm -rf node_modules && pnpm install",
   "buildCommand": "npx vite build",
   "outputDirectory": "dist",
   "rewrites": [
