@@ -10,9 +10,9 @@ const cx = classnames.bind(styles)
 
 // 지원 플랫폼 URL 패턴
 const VIDEO_URL_PATTERNS: Record<string, RegExp> = {
-  instagram: /^https?:\/\/(www\.)?instagram\.com\/reels?\//,
+  instagram: /^https?:\/\/(www\.)?instagram\.com\/(reels?|p)\//,
   tiktok: /^https?:\/\/(www\.)?(tiktok\.com|vm\.tiktok\.com)\//,
-  youtube: /^https?:\/\/(www\.)?(youtube\.com\/shorts|youtu\.be)\//,
+  youtube: /^https?:\/\/(www\.)?(youtube\.com\/(shorts|watch)|youtu\.be)\//,
 }
 
 const validateVideoUrl = (url: string): boolean => {
