@@ -11,15 +11,9 @@ const Auth = () => {
     <div className={cx('auth')}>
       <div className={cx('card')}>
         <h1 className={cx('title')}>로그인</h1>
-        <p className={cx('subtitle')}>레시피를 저장하고 히스토리를 관리하세요</p>
+        <p className={cx('subtitle')}>로그인하고 레시피 분석을 시작하세요</p>
 
         <div className={cx('buttons')}>
-          <button
-            className={cx('socialButton', 'kakaoButton')}
-            onClick={signInWithKakao}
-          >
-            카카오로 시작하기
-          </button>
           <button
             className={cx('socialButton', 'googleButton')}
             onClick={signInWithGoogle}
@@ -29,7 +23,7 @@ const Auth = () => {
         </div>
 
         <div className={cx('freeNotice')}>
-          로그인 없이도 하루 3회 무료 분석이 가능합니다
+          간편하게 로그인하고 무제한 레시피 분석을 이용하세요
         </div>
       </div>
     </div>

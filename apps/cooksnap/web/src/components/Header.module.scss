@@ -50,6 +50,10 @@
   }
 }
 
+.profileWrapper {
+  position: relative;
+}
+
 .profileButton {
   @include button-reset;
   width: 32px;
@@ -60,4 +64,35 @@
   font-size: 14px;
   font-weight: 600;
   @include flex-center;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + $spacing-xs);
+  right: 0;
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-md;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  overflow: hidden;
+  z-index: 200;
+
+  button {
+    @include button-reset;
+    display: block;
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    font-size: 14px;
+    color: $text-primary;
+    text-align: left;
+
+    &:hover {
+      background-color: $background;
+    }
+
+    &:last-child {
+      color: $error;
+    }
+  }
 }

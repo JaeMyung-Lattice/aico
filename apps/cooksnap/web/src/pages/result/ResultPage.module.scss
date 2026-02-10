@@ -132,6 +132,11 @@
   }
 }
 
+.ingredientInfo {
+  flex: 1;
+  min-width: 0;
+}
+
 .ingredientName {
   font-weight: 600;
 }
@@ -141,9 +146,32 @@
   font-size: 14px;
 }
 
+.ingredientActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-shrink: 0;
+}
+
 .ingredientPrice {
   font-weight: 700;
   color: $primary;
+}
+
+.coupangLink {
+  padding: $spacing-xs $spacing-sm;
+  background-color: $background;
+  color: $text-primary;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: $radius-sm;
+  text-decoration: none;
+  border: 1px solid $border;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: $border;
+  }
 }
 
 .stepList {
@@ -202,7 +230,6 @@
 }
 
 .cartButton {
-  @include button-reset;
   display: block;
   width: 100%;
   max-width: $wide;
@@ -214,6 +241,7 @@
   font-weight: 700;
   border-radius: $radius-md;
   text-align: center;
+  text-decoration: none;
   transition: background-color 0.2s;
 
   &:hover {

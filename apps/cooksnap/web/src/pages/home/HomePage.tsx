@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import classnames from 'classnames/bind'
+import { useAuthStore } from '@/stores/useAuthStore'
 import api from '@/lib/api'
 import type { AnalyzeResponse } from '@/types/recipe'
 import styles from './HomePage.module.scss'
@@ -27,11 +28,21 @@ const LOADING_STEPS = [
 
 const Landing = () => {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [url, setUrl] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // 로그인 후 복귀 시 저장된 URL 복원
+  useEffect(() => {
+    const pendingUrl = sessionStorage.getItem('pending_analyze_url')
+    if (pendingUrl && user) {
+      sessionStorage.removeItem('pending_analyze_url')
+      setUrl(pendingUrl)
+    }
+  }, [user])
 
   useEffect(() => {
     if (isLoading) {
@@ -62,6 +73,13 @@ const Landing = () => {
 
     if (!validateVideoUrl(url.trim())) {
       setError('Instagram Reels, TikTok, YouTube Shorts URL만 지원합니다.')
+      return
+    }
+
+    // 비로그인 시 URL 저장 후 로그인 페이지로 이동
+    if (!user) {
+      sessionStorage.setItem('pending_analyze_url', url.trim())
+      navigate('/auth')
       return
     }
 

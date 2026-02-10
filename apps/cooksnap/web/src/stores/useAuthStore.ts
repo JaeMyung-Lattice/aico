@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
+import api from '@/lib/api'
 import type { User } from '@/types/user'
 
 interface AuthState {
@@ -13,7 +14,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  isLoading: false,
+  isLoading: true,
 
   initialize: async () => {
     if (!supabase) {
@@ -25,12 +26,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         localStorage.setItem('access_token', session.access_token)
-        set({ user: null, isLoading: false })
+        const { data } = await api.get<User>('/auth/me')
+        set({ user: data, isLoading: false })
       } else {
         localStorage.removeItem('access_token')
         set({ user: null, isLoading: false })
       }
     } catch {
+      localStorage.removeItem('access_token')
       set({ user: null, isLoading: false })
     }
   },

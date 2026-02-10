@@ -12,6 +12,10 @@ const formatPrice = (price: number | null): string => {
   return `${price.toLocaleString()}원`
 }
 
+const getCoupangSearchUrl = (keyword: string): string => {
+  return `https://www.coupang.com/np/search?q=${encodeURIComponent(keyword)}`
+}
+
 const Result = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -84,7 +88,7 @@ const Result = () => {
         <div className={cx('ingredientList')}>
           {recipe.ingredients.map((ingredient) => (
             <div key={ingredient.id} className={cx('ingredientItem')}>
-              <div>
+              <div className={cx('ingredientInfo')}>
                 <span className={cx('ingredientName')}>{ingredient.name}</span>
                 {ingredient.amount && (
                   <span className={cx('ingredientAmount')}>
@@ -94,9 +98,19 @@ const Result = () => {
                   </span>
                 )}
               </div>
-              <span className={cx('ingredientPrice')}>
-                {formatPrice(ingredient.estimatedPrice)}
-              </span>
+              <div className={cx('ingredientActions')}>
+                <span className={cx('ingredientPrice')}>
+                  {formatPrice(ingredient.estimatedPrice)}
+                </span>
+                <a
+                  href={getCoupangSearchUrl(ingredient.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cx('coupangLink')}
+                >
+                  구매
+                </a>
+              </div>
             </div>
           ))}
         </div>
@@ -115,11 +129,16 @@ const Result = () => {
         </div>
       </div>
 
-      {/* 장바구니 한번에 담기 (sticky) */}
+      {/* 쿠팡에서 재료 검색 (sticky) */}
       <div className={cx('stickyBottom')}>
-        <button className={cx('cartButton')}>
-          장바구니 한번에 담기
-        </button>
+        <a
+          href={getCoupangSearchUrl(recipe.ingredients.map((i) => i.name).join(' '))}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cx('cartButton')}
+        >
+          쿠팡에서 재료 한번에 검색하기
+        </a>
       </div>
     </div>
   )
