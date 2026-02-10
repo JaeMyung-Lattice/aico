@@ -1,6 +1,6 @@
 {
   "installCommand": "cd ../../.. && pnpm install",
-  "buildCommand": "vite build",
+  "buildCommand": "npx vite build",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
