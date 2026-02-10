@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GeminiService } from '../gemini/gemini.service';
-import { VideoService } from '../video/video.service';
 
 // 영상 플랫폼 판별
 const detectPlatform = (url: string): string => {
@@ -18,7 +17,6 @@ export class RecipesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly geminiService: GeminiService,
-    private readonly videoService: VideoService,
   ) {}
 
   // 영상 URL 분석 → 레시피 생성
@@ -35,60 +33,45 @@ export class RecipesService {
     }
 
     const platform = detectPlatform(url);
-    const isYoutube = platform === 'youtube';
 
-    // YouTube → URL 직접 분석, 그 외 → yt-dlp 다운로드 후 파일 분석
-    let geminiResult;
-    let videoPath: string | null = null;
+    // Gemini에 URL 직접 전달하여 영상 분석
+    this.logger.log(`영상 URL 직접 분석: ${url} (${platform})`);
+    const geminiResult = await this.geminiService.analyzeVideoUrl(url);
 
-    try {
-      if (isYoutube) {
-        this.logger.log(`YouTube URL 직접 분석: ${url}`);
-        geminiResult = await this.geminiService.analyzeVideoUrl(url);
-      } else {
-        videoPath = await this.videoService.download(url);
-        geminiResult = await this.geminiService.analyzeVideo(videoPath);
-      }
-
-      if (!geminiResult.title || !geminiResult.ingredients?.length) {
-        throw new BadRequestException('영상에서 레시피를 추출할 수 없습니다.');
-      }
-
-      // 트랜잭션으로 Recipe + Ingredients + Steps 일괄 생성
-      const recipe = await this.prisma.recipe.create({
-        data: {
-          videoUrl: url,
-          videoPlatform: platform,
-          title: geminiResult.title,
-          difficulty: geminiResult.difficulty || null,
-          cookTime: geminiResult.cookTime || null,
-          servings: geminiResult.servings || null,
-          geminiRawResponse: geminiResult as object,
-          ingredients: {
-            create: geminiResult.ingredients.map((ing, index) => ({
-              name: ing.name,
-              amount: ing.amount || null,
-              unit: ing.unit || null,
-              sortOrder: index + 1,
-            })),
-          },
-          steps: {
-            create: geminiResult.steps.map((step) => ({
-              stepOrder: step.stepNumber,
-              description: step.description,
-            })),
-          },
-        },
-      });
-
-      this.logger.log(`레시피 생성 완료: ${recipe.id} - ${recipe.title}`);
-
-      return { id: recipe.id };
-    } finally {
-      if (videoPath) {
-        this.videoService.cleanup(videoPath);
-      }
+    if (!geminiResult.title || !geminiResult.ingredients?.length) {
+      throw new BadRequestException('영상에서 레시피를 추출할 수 없습니다.');
     }
+
+    // 트랜잭션으로 Recipe + Ingredients + Steps 일괄 생성
+    const recipe = await this.prisma.recipe.create({
+      data: {
+        videoUrl: url,
+        videoPlatform: platform,
+        title: geminiResult.title,
+        difficulty: geminiResult.difficulty || null,
+        cookTime: geminiResult.cookTime || null,
+        servings: geminiResult.servings || null,
+        geminiRawResponse: geminiResult as object,
+        ingredients: {
+          create: geminiResult.ingredients.map((ing, index) => ({
+            name: ing.name,
+            amount: ing.amount || null,
+            unit: ing.unit || null,
+            sortOrder: index + 1,
+          })),
+        },
+        steps: {
+          create: geminiResult.steps.map((step) => ({
+            stepOrder: step.stepNumber,
+            description: step.description,
+          })),
+        },
+      },
+    });
+
+    this.logger.log(`레시피 생성 완료: ${recipe.id} - ${recipe.title}`);
+
+    return { id: recipe.id };
   };
 
   // 레시피 상세 조회

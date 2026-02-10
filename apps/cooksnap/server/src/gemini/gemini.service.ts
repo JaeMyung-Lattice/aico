@@ -130,11 +130,11 @@ export class GeminiService {
     });
   };
 
-  // YouTube URL 직접 분석 (다운로드 불필요)
+  // 영상 URL 직접 분석 (다운로드 불필요)
   analyzeVideoUrl = async (videoUrl: string): Promise<GeminiRecipeResult> => {
     const model = this.getModel();
 
-    this.logger.log(`YouTube URL 직접 분석: ${videoUrl}`);
+    this.logger.log(`영상 URL 직접 분석: ${videoUrl}`);
 
     try {
       const result = await model.generateContent([
@@ -148,12 +148,12 @@ export class GeminiService {
       ]);
       const text = result.response.text();
 
-      this.logger.log('Gemini YouTube URL 분석 완료');
+      this.logger.log('Gemini URL 분석 완료');
 
       return JSON.parse(text) as GeminiRecipeResult;
     } catch (error) {
-      this.logger.error('Gemini YouTube URL 분석 실패', error);
-      throw new Error('YouTube 영상 분석에 실패했습니다. 다시 시도해주세요.');
+      this.logger.error('Gemini URL 분석 실패', error);
+      throw new Error('영상 분석에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
