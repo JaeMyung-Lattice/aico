@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import type { Recipe } from '@/types/recipe'
-import styles from './Result.module.scss'
+import styles from './ResultPage.module.scss'
 
 const cx = classnames.bind(styles)
 

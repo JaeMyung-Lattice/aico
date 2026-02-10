@@ -13,7 +13,7 @@
 }
 
 @mixin tablet-up {
-  @media (min-width: $tablet + 1px) {
+  @media (min-width: 769px) {
     @content;
   }
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import type { AnalyzeResponse } from '@/types/recipe'
-import styles from './Landing.module.scss'
+import styles from './HomePage.module.scss'
 
 const cx = classnames.bind(styles)
 

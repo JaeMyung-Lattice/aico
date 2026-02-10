@@ -1,6 +1,6 @@
 import classnames from 'classnames/bind'
 import { useAuthStore } from '@/stores/useAuthStore'
-import styles from './Auth.module.scss'
+import styles from './AuthPage.module.scss'
 
 const cx = classnames.bind(styles)
 
