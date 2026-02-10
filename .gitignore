@@ -37,9 +37,6 @@ yarn-error.log*
 *.pem
 .vscode
 
-# yt-dlp binary
-apps/cooksnap/server/yt-dlp
-
 # Downloaded videos (temp)
 apps/cooksnap/server/tmp/
 

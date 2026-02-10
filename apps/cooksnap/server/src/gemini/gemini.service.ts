@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
-import { GoogleAIFileManager, FileState } from '@google/generative-ai/server';
 
 // Gemini 응답 타입
 export interface GeminiRecipeResult {
@@ -64,44 +63,13 @@ const recipeResponseSchema: Schema = {
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
   private genAI: GoogleGenerativeAI | null = null;
-  private fileManager: GoogleAIFileManager | null = null;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('gemini.apiKey');
     if (apiKey) {
       this.genAI = new GoogleGenerativeAI(apiKey);
-      this.fileManager = new GoogleAIFileManager(apiKey);
     }
   }
-
-  // 영상 파일 업로드 → Gemini File API
-  private uploadVideo = async (filePath: string): Promise<string> => {
-    if (!this.fileManager) {
-      throw new Error('Gemini API key가 설정되지 않았습니다.');
-    }
-
-    this.logger.log(`영상 업로드 시작: ${filePath}`);
-
-    const uploadResult = await this.fileManager.uploadFile(filePath, {
-      mimeType: 'video/mp4',
-      displayName: `cooksnap-${Date.now()}`,
-    });
-
-    // 영상 처리 완료 대기
-    let file = uploadResult.file;
-    while (file.state === FileState.PROCESSING) {
-      this.logger.log('영상 처리 중...');
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      file = await this.fileManager.getFile(file.name);
-    }
-
-    if (file.state === FileState.FAILED) {
-      throw new Error('영상 처리에 실패했습니다.');
-    }
-
-    this.logger.log(`영상 업로드 완료: ${file.uri}`);
-    return file.uri;
-  };
 
   private readonly recipePrompt = `당신은 요리 전문가입니다. 이 요리 영상을 시청하고 레시피를 추출하세요.
 
@@ -153,36 +121,6 @@ export class GeminiService {
       return JSON.parse(text) as GeminiRecipeResult;
     } catch (error) {
       this.logger.error('Gemini URL 분석 실패', error);
-      throw new Error('영상 분석에 실패했습니다. 다시 시도해주세요.');
-    }
-  };
-
-  // 영상 파일로 레시피 분석 (멀티모달)
-  analyzeVideo = async (videoFilePath: string): Promise<GeminiRecipeResult> => {
-    const model = this.getModel();
-
-    // 1. 영상을 Gemini File API에 업로드
-    const fileUri = await this.uploadVideo(videoFilePath);
-
-    this.logger.log('Gemini 멀티모달 영상 분석 시작');
-
-    try {
-      const result = await model.generateContent([
-        {
-          fileData: {
-            mimeType: 'video/mp4',
-            fileUri,
-          },
-        },
-        { text: this.recipePrompt },
-      ]);
-      const text = result.response.text();
-
-      this.logger.log('Gemini 멀티모달 분석 완료');
-
-      return JSON.parse(text) as GeminiRecipeResult;
-    } catch (error) {
-      this.logger.error('Gemini 분석 실패', error);
       throw new Error('영상 분석에 실패했습니다. 다시 시도해주세요.');
     }
   };
