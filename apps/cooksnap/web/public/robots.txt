@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /mypage
+
+Sitemap: https://aico-cooksnap-web.vercel.app/sitemap.xml

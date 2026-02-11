@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import classnames from 'classnames/bind';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Loading } from '@repo/ui';
@@ -47,6 +48,10 @@ const Auth = () => {
 
   return (
     <div className={cx('auth')}>
+      <Helmet>
+        <title>로그인 - CookSnap</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <Loading overlay loading={isSigningIn} message="로그인 중..." />
       <div className={cx('card')}>
         <h1 className={cx('title')}>로그인</h1>

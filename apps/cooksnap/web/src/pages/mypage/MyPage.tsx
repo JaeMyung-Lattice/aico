@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { Helmet } from 'react-helmet-async'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/useAuthStore'
@@ -47,6 +48,10 @@ const MyPage = () => {
 
   return (
     <div className={cx('mypage')}>
+      <Helmet>
+        <title>마이페이지 - CookSnap</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className={cx('pageHeader')}>
         <h1 className={cx('title')}>마이페이지</h1>
         {user?.isPremium ? (

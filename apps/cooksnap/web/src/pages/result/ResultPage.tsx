@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Helmet } from 'react-helmet-async'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/useAuthStore'
@@ -105,8 +106,35 @@ const Result = () => {
     )
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Recipe',
+    name: recipe.title,
+    ...(recipe.thumbnailUrl && { image: recipe.thumbnailUrl }),
+    ...(recipe.cookTime && { cookTime: `PT${recipe.cookTime}M` }),
+    ...(recipe.servings && { recipeYield: `${recipe.servings}인분` }),
+    ...(recipe.difficulty && { description: `난이도: ${recipe.difficulty}` }),
+    recipeIngredient: recipe.ingredients.map((i) =>
+      `${i.name}${i.amount ? ` ${i.amount}` : ''}${i.unit || ''}`
+    ),
+    recipeInstructions: recipe.steps.map((s) => ({
+      '@type': 'HowToStep',
+      text: s.description,
+    })),
+  }
+
   return (
     <div className={cx('result')}>
+      <Helmet>
+        <title>{recipe.title} - CookSnap</title>
+        <meta name="description" content={`${recipe.title} 레시피 - 재료비 ${recipe.totalPrice ? `${recipe.totalPrice.toLocaleString()}원` : '확인'}, 재료 ${recipe.ingredients.length}가지`} />
+        <link rel="canonical" href={`https://aico-cooksnap-web.vercel.app/result/${id}`} />
+        <meta property="og:title" content={`${recipe.title} - CookSnap`} />
+        <meta property="og:description" content={`재료 ${recipe.ingredients.length}가지${recipe.totalPrice ? `, 총 ${recipe.totalPrice.toLocaleString()}원` : ''}`} />
+        {recipe.thumbnailUrl && <meta property="og:image" content={recipe.thumbnailUrl} />}
+        <meta property="og:url" content={`https://aico-cooksnap-web.vercel.app/result/${id}`} />
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
       {/* 레시피 헤더 */}
       <div className={cx('header')}>
         <div className={cx('headerTop')}>

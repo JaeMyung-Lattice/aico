@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
+import { Helmet } from 'react-helmet-async'
 import classnames from 'classnames/bind'
 import { useAuthStore } from '@/stores/useAuthStore'
 import api from '@/lib/api'
@@ -137,6 +138,11 @@ const Landing = () => {
 
   return (
     <div className={cx('landing')}>
+      <Helmet>
+        <title>CookSnap - 영상 붙여넣으면, 재료비부터 주문까지</title>
+        <meta name="description" content="숏폼 레시피 영상 URL 하나로 레시피, 재료, 가격, 주문까지 원스톱. Instagram Reels, TikTok, YouTube Shorts 지원." />
+        <link rel="canonical" href="https://aico-cooksnap-web.vercel.app/" />
+      </Helmet>
       <h1 className={cx('headline')}>
         영상 붙여넣으면,
         <br />
