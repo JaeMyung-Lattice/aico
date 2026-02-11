@@ -7,10 +7,41 @@
   padding-bottom: $spacing-xxl;
 }
 
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+}
+
 .title {
   font-size: 24px;
   font-weight: 800;
-  margin-bottom: $spacing-xl;
+}
+
+.premiumBadge {
+  padding: 6px $spacing-md;
+  font-size: 13px;
+  font-weight: 700;
+  color: $primary;
+  background-color: rgba($primary, 0.08);
+  border-radius: $radius-full;
+}
+
+.upgradeButton {
+  @include button-reset;
+  padding: $spacing-sm $spacing-md;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
+  border-radius: $radius-sm;
+  transition: $transition-base;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($primary, 0.25);
+  }
 }
 
 .tabs {
@@ -86,6 +117,48 @@
   font-size: 12px;
   color: $text-secondary;
   margin-top: $spacing-xs;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1px solid rgba($border, 0.4);
+}
+
+.historyInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.historyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historyUrl {
+  font-size: 12px;
+  color: $text-secondary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historyDate {
+  font-size: 12px;
+  color: $text-secondary;
+  flex-shrink: 0;
 }
 
 .empty {

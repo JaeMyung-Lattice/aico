@@ -53,6 +53,7 @@ const Header = () => {
         <nav className={cx('nav')}>
           {user ? (
             <div className={cx('profileWrapper')} ref={menuRef}>
+              {user.isPremium && <span className={cx('premiumBadge')}>P</span>}
               <button className={cx('profileButton')} onClick={() => setMenuOpen(!menuOpen)}>
                 {user.nickname?.[0] || user.email[0]}
               </button>

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import classnames from 'classnames/bind'
 import { useAuthStore } from '@/stores/useAuthStore'
 import api from '@/lib/api'
+import PremiumModal from '@/components/PremiumModal'
 import type { AnalyzeResponse } from '@/types/recipe'
 import styles from './HomePage.module.scss'
 
@@ -28,11 +30,13 @@ const LOADING_STEPS = [
 
 const Landing = () => {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const queryClient = useQueryClient()
+  const { user, quotaStatus, fetchQuota } = useAuthStore()
   const [url, setUrl] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // 로그인 후 복귀 시 저장된 URL 복원
@@ -87,11 +91,19 @@ const Landing = () => {
 
     try {
       const { data } = await api.post<AnalyzeResponse>('/recipes/analyze', { url: url.trim() })
+      await fetchQuota()
+      queryClient.invalidateQueries({ queryKey: ['my-history'] })
       navigate(`/result/${data.id}`)
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const message = (err as any)?.response?.data?.message || '분석 중 오류가 발생했습니다. 다시 시도해주세요.'
-      setError(message)
+      const status = (err as any)?.response?.status
+      if (status === 403) {
+        setShowPremiumModal(true)
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const message = (err as any)?.response?.data?.message || '분석 중 오류가 발생했습니다. 다시 시도해주세요.'
+        setError(message)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -156,6 +168,13 @@ const Landing = () => {
         {error && <p className={cx('errorMessage')}>{error}</p>}
       </div>
 
+      {/* 쿼터 표시 */}
+      {user && quotaStatus && !quotaStatus.isPremium && (
+        <p className={cx('quotaBadge')}>
+          오늘 {quotaStatus.remaining}회 남음
+        </p>
+      )}
+
       <div className={cx('platforms')}>
         <span className={cx('platformBadge')}>Instagram Reels</span>
         <span className={cx('platformBadge')}>TikTok</span>
@@ -168,6 +187,10 @@ const Landing = () => {
           "이 레시피, 재료비 총 4,200원 — 외식비 대비 62% 절약"
         </p>
       </div>
+
+      {showPremiumModal && (
+        <PremiumModal onClose={() => setShowPremiumModal(false)} />
+      )}
     </div>
   )
 }

@@ -8,16 +8,19 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String
-  nickname   String?
-  provider   String   // "kakao" | "google"
-  providerId String   @map("provider_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id               String    @id @default(uuid())
+  email            String
+  nickname         String?
+  provider         String    // "kakao" | "google"
+  providerId       String    @map("provider_id")
+  isPremium        Boolean   @default(false) @map("is_premium")
+  premiumExpiresAt DateTime? @map("premium_expires_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   savedRecipes    SavedRecipe[]
   analysisHistory AnalysisHistory[]
+  dailyUsages     DailyUsage[]
 
   @@unique([provider, providerId])
   @@map("users")
@@ -98,4 +101,18 @@ model AnalysisHistory {
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("analysis_history")
+}
+
+model DailyUsage {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  date      DateTime @db.Date
+  count     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("daily_usages")
 }

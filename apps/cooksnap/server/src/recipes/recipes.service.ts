@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GeminiService } from '../gemini/gemini.service';
+import { PremiumService } from '../premium/premium.service';
 
 // 영상 플랫폼 판별
 const detectPlatform = (url: string): string => {
@@ -17,11 +18,18 @@ export class RecipesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly geminiService: GeminiService,
+    private readonly premiumService: PremiumService,
   ) {}
 
   // 영상 URL 분석 → 레시피 생성
-  analyze = async (url: string, userId: string | null = null): Promise<{ id: string }> => {
-    // 이미 분석된 URL인지 확인 (중복 방지)
+  analyze = async (url: string, userId: string): Promise<{ id: string }> => {
+    // 쿼터 체크 (FREE 유저 일 3회 제한)
+    const { allowed } = await this.premiumService.getQuota(userId);
+    if (!allowed) {
+      throw new ForbiddenException('오늘의 무료 분석 횟수를 모두 사용했습니다. 프리미엄으로 업그레이드하세요.');
+    }
+
+    // 이미 분석된 URL인지 확인 (중복 방지, 카운트 증가 안 함)
     const existing = await this.prisma.recipe.findFirst({
       where: { videoUrl: url },
       select: { id: true },
@@ -71,6 +79,9 @@ export class RecipesService {
     });
 
     this.logger.log(`레시피 생성 완료: ${recipe.id} - ${recipe.title}`);
+
+    // 새 분석만 카운트 증가
+    await this.premiumService.incrementUsage(userId);
     await this.createHistory(recipe.id, url, userId);
 
     return { id: recipe.id };

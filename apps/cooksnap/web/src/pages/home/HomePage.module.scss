@@ -173,6 +173,17 @@
   margin-top: $spacing-sm;
 }
 
+.quotaBadge {
+  display: inline-block;
+  padding: 6px $spacing-md;
+  margin-bottom: $spacing-lg;
+  font-size: 13px;
+  font-weight: 600;
+  color: $primary;
+  background-color: rgba($primary, 0.08);
+  border-radius: $radius-full;
+}
+
 .platforms {
   display: flex;
   justify-content: center;

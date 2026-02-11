@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
+import { useAuthStore } from '@/stores/useAuthStore'
 import { Loading } from '@repo/ui'
+import PremiumModal from '@/components/PremiumModal'
 import type { SavedRecipe, AnalysisHistoryItem } from '@/types/user'
 import styles from './MyPage.module.scss'
 
@@ -13,7 +15,9 @@ type Tab = 'saved' | 'history'
 
 const MyPage = () => {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<Tab>('saved')
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
 
   const { data: savedRecipes = [], isLoading: isSavedLoading } = useQuery<SavedRecipe[]>({
     queryKey: ['my-recipes'],
@@ -43,7 +47,19 @@ const MyPage = () => {
 
   return (
     <div className={cx('mypage')}>
-      <h1 className={cx('title')}>마이페이지</h1>
+      <div className={cx('pageHeader')}>
+        <h1 className={cx('title')}>마이페이지</h1>
+        {user?.isPremium ? (
+          <span className={cx('premiumBadge')}>Premium</span>
+        ) : (
+          <button
+            className={cx('upgradeButton')}
+            onClick={() => setShowPremiumModal(true)}
+          >
+            Premium 구독하기
+          </button>
+        )}
+      </div>
 
       <div className={cx('tabs')}>
         <button
@@ -96,26 +112,31 @@ const MyPage = () => {
       )}
 
       {activeTab === 'history' && (
-        <div className={cx('grid')}>
+        <div className={cx('historyList')}>
           {history.length === 0 ? (
             <div className={cx('empty')}>분석 히스토리가 없습니다.</div>
           ) : (
             history.map((item) => (
               <div
                 key={item.id}
-                className={cx('recipeCard')}
-                onClick={() => handleRecipeClick(item.recipeId)}
+                className={cx('historyItem')}
               >
-                <div className={cx('cardBody')}>
-                  <p className={cx('cardTitle')}>{item.recipe.title}</p>
-                  <p className={cx('cardDate')}>
-                    {new Date(item.createdAt).toLocaleDateString('ko-KR')}
-                  </p>
+                <div className={cx('historyInfo')}>
+                  <p className={cx('historyTitle')}>{item.recipe.title}</p>
+                  {user?.isPremium && (
+                    <p className={cx('historyUrl')}>{item.videoUrl}</p>
+                  )}
                 </div>
+                <span className={cx('historyDate')}>
+                  {new Date(item.createdAt).toLocaleDateString('ko-KR')}
+                </span>
               </div>
             ))
           )}
         </div>
+      )}
+      {showPremiumModal && (
+        <PremiumModal onClose={() => setShowPremiumModal(false)} />
       )}
     </div>
   )

@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Loading } from '@repo/ui'
+import PremiumModal from '@/components/PremiumModal'
 import type { Recipe, PurchaseLink } from '@/types/recipe'
 import styles from './ResultPage.module.scss'
 
@@ -19,6 +21,7 @@ const Result = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuthStore()
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
 
   const { data: recipe, isLoading, error } = useQuery<Recipe>({
     queryKey: ['recipe', id],
@@ -29,14 +32,14 @@ const Result = () => {
     enabled: !!id,
   })
 
-  // 저장 여부 확인 (로그인 시에만)
+  // 저장 여부 확인 (프리미엄 로그인 사용자만)
   const { data: saveStatus } = useQuery<{ saved: boolean }>({
     queryKey: ['recipe-saved', id],
     queryFn: async () => {
       const { data } = await api.get(`/users/me/recipes/${id}/saved`)
       return data
     },
-    enabled: !!user && !!id,
+    enabled: !!user?.isPremium && !!id,
   })
 
   const saveMutation = useMutation({
@@ -56,6 +59,11 @@ const Result = () => {
   })
 
   const handleToggleSave = () => {
+    if (!user?.isPremium) {
+      setShowPremiumModal(true)
+      return
+    }
+
     if (saveStatus?.saved) {
       unsaveMutation.mutate()
     } else {
@@ -105,10 +113,14 @@ const Result = () => {
           <h1 className={cx('title')}>{recipe.title}</h1>
           {user && (
             <button
-              className={cx('saveButton', { saved: saveStatus?.saved })}
+              className={cx('saveButton', {
+                saved: saveStatus?.saved,
+                locked: !user.isPremium,
+              })}
               onClick={handleToggleSave}
               disabled={saveMutation.isPending || unsaveMutation.isPending}
             >
+              {!user.isPremium && '🔒 '}
               {saveStatus?.saved ? '저장됨' : '저장'}
             </button>
           )}
@@ -190,7 +202,7 @@ const Result = () => {
         </div>
       </div>
 
-      {/* 쿠팡 파트너스 배너 */}
+      {/* 쿠팡 파트너스 배너 (모든 유저) */}
       <div className={cx('coupangBanner')}>
         <iframe
           src="https://ads-partners.coupang.com/widgets.html?id=964330&template=carousel&trackingCode=AF5330853&subId=&width=320&height=320&tsource="
@@ -207,8 +219,8 @@ const Result = () => {
         </p>
       </div>
 
-      {/* 쿠팡에서 재료 구매 (sticky) */}
-      {purchaseLinks?.[0] && (
+      {/* 쿠팡에서 재료 구매 (sticky) - Premium만 */}
+      {purchaseLinks?.[0] && user?.isPremium && (
         <div className={cx('stickyBottom')}>
           <a
             href={purchaseLinks[0].purchaseUrl}
@@ -219,6 +231,10 @@ const Result = () => {
             쿠팡에서 재료 구매하기
           </a>
         </div>
+      )}
+
+      {showPremiumModal && (
+        <PremiumModal onClose={() => setShowPremiumModal(false)} />
       )}
     </div>
   )

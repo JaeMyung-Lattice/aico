@@ -8,6 +8,7 @@ import { KamisModule } from './kamis/kamis.module';
 import { CoupangModule } from './coupang/coupang.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { PremiumModule } from './premium/premium.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -23,6 +24,7 @@ import configuration from './config/configuration';
     CoupangModule,
     AuthModule,
     UsersModule,
+    PremiumModule,
   ],
   controllers: [AppController],
 })

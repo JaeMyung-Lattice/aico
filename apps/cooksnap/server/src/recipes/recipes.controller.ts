@@ -2,7 +2,7 @@ import { Controller, Post, Get, Param, Body, UseGuards, Req } from '@nestjs/comm
 import { RecipesService } from './recipes.service';
 import { KamisService } from '../kamis/kamis.service';
 import { CoupangService } from '../coupang/coupang.service';
-import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { AnalyzeRecipeDto } from './dto/analyze-recipe.dto';
 
 @Controller('recipes')
@@ -14,9 +14,9 @@ export class RecipesController {
   ) {}
 
   @Post('analyze')
-  @UseGuards(OptionalAuthGuard)
+  @UseGuards(AuthGuard)
   analyze(@Body() dto: AnalyzeRecipeDto, @Req() req: any) {
-    return this.recipesService.analyze(dto.url, req.user?.id || null);
+    return this.recipesService.analyze(dto.url, req.user.id);
   }
 
   @Get(':id')

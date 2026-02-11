@@ -87,6 +87,16 @@
     }
   }
 
+  &.locked {
+    border-color: rgba($border, 0.8);
+    color: $text-secondary;
+
+    &:hover {
+      background-color: rgba($border, 0.1);
+      border-color: $border;
+    }
+  }
+
   &:disabled {
     opacity: 0.6;
     pointer-events: none;

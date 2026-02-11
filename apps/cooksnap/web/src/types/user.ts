@@ -3,7 +3,15 @@ export interface User {
   email: string
   nickname: string | null
   provider: string
+  isPremium: boolean
+  premiumExpiresAt: string | null
   createdAt: string
+}
+
+export interface QuotaStatus {
+  allowed: boolean
+  remaining: number // -1 = 무제한
+  isPremium: boolean
 }
 
 export interface SavedRecipe {

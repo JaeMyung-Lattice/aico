@@ -1,0 +1,125 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  @include flex-center;
+  padding: $spacing-md;
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background-color: $surface;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  box-shadow: $shadow-lg;
+}
+
+.closeButton {
+  @include button-reset;
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+  width: 32px;
+  height: 32px;
+  @include flex-center;
+  font-size: 20px;
+  color: $text-secondary;
+  border-radius: $radius-sm;
+  transition: $transition-fast;
+
+  &:hover {
+    background-color: $background;
+    color: $text-primary;
+  }
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: $spacing-lg;
+}
+
+.benefits {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background-color: $background;
+  border-radius: $radius-md;
+}
+
+.benefitIcon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  @include flex-center;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+.benefitText {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pricing {
+  text-align: center;
+  margin-bottom: $spacing-lg;
+}
+
+.price {
+  display: block;
+  font-size: 28px;
+  font-weight: 800;
+  color: $primary;
+  margin-bottom: $spacing-xs;
+}
+
+.priceNote {
+  font-size: 14px;
+  color: $text-secondary;
+}
+
+.subscribeButton {
+  @include button-reset;
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: $radius-md;
+  text-align: center;
+  transition: $transition-base;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.disclaimer {
+  margin-top: $spacing-md;
+  font-size: 12px;
+  color: $text-secondary;
+  text-align: center;
+  line-height: 1.5;
+}

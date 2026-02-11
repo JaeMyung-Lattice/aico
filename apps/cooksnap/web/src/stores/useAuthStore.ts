@@ -1,20 +1,23 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import api from '@/lib/api'
-import type { User } from '@/types/user'
+import type { User, QuotaStatus } from '@/types/user'
 
 interface AuthState {
   user: User | null
   isLoading: boolean
+  quotaStatus: QuotaStatus | null
   initialize: () => Promise<void>
+  fetchQuota: () => Promise<void>
   signInWithKakao: () => Promise<void>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: true,
+  quotaStatus: null,
 
   initialize: async () => {
     if (!supabase) {
@@ -28,6 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         localStorage.setItem('access_token', session.access_token)
         const { data } = await api.get<User>('/auth/me')
         set({ user: data, isLoading: false })
+        get().fetchQuota()
       } else {
         localStorage.removeItem('access_token')
         set({ user: null, isLoading: false })
@@ -35,6 +39,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {
       localStorage.removeItem('access_token')
       set({ user: null, isLoading: false })
+    }
+  },
+
+  fetchQuota: async () => {
+    try {
+      const { data } = await api.get<QuotaStatus>('/users/me/quota')
+      set({ quotaStatus: data })
+    } catch {
+      set({ quotaStatus: null })
     }
   },
 
@@ -58,6 +71,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (!supabase) return
     await supabase.auth.signOut()
     localStorage.removeItem('access_token')
-    set({ user: null })
+    set({ user: null, quotaStatus: null })
   },
 }))
