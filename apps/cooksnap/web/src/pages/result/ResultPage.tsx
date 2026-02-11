@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
+import { useAuthStore } from '@/stores/useAuthStore'
 import { Loading } from '@repo/ui'
 import type { Recipe, PurchaseLink } from '@/types/recipe'
 import styles from './ResultPage.module.scss'
@@ -16,6 +17,8 @@ const formatPrice = (price: number | null): string => {
 const Result = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   const { data: recipe, isLoading, error } = useQuery<Recipe>({
     queryKey: ['recipe', id],
@@ -25,6 +28,40 @@ const Result = () => {
     },
     enabled: !!id,
   })
+
+  // 저장 여부 확인 (로그인 시에만)
+  const { data: saveStatus } = useQuery<{ saved: boolean }>({
+    queryKey: ['recipe-saved', id],
+    queryFn: async () => {
+      const { data } = await api.get(`/users/me/recipes/${id}/saved`)
+      return data
+    },
+    enabled: !!user && !!id,
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: () => api.post(`/users/me/recipes/${id}/save`),
+    onSuccess: () => {
+      queryClient.setQueryData(['recipe-saved', id], { saved: true })
+      queryClient.invalidateQueries({ queryKey: ['my-recipes'] })
+    },
+  })
+
+  const unsaveMutation = useMutation({
+    mutationFn: () => api.delete(`/users/me/recipes/${id}/save`),
+    onSuccess: () => {
+      queryClient.setQueryData(['recipe-saved', id], { saved: false })
+      queryClient.invalidateQueries({ queryKey: ['my-recipes'] })
+    },
+  })
+
+  const handleToggleSave = () => {
+    if (saveStatus?.saved) {
+      unsaveMutation.mutate()
+    } else {
+      saveMutation.mutate()
+    }
+  }
 
   // 구매 링크 조회 (레시피 로딩 완료 후)
   const { data: purchaseLinks } = useQuery<PurchaseLink[]>({
@@ -64,7 +101,18 @@ const Result = () => {
     <div className={cx('result')}>
       {/* 레시피 헤더 */}
       <div className={cx('header')}>
-        <h1 className={cx('title')}>{recipe.title}</h1>
+        <div className={cx('headerTop')}>
+          <h1 className={cx('title')}>{recipe.title}</h1>
+          {user && (
+            <button
+              className={cx('saveButton', { saved: saveStatus?.saved })}
+              onClick={handleToggleSave}
+              disabled={saveMutation.isPending || unsaveMutation.isPending}
+            >
+              {saveStatus?.saved ? '저장됨' : '저장'}
+            </button>
+          )}
+        </div>
         <div className={cx('meta')}>
           {recipe.difficulty && (
             <span className={cx('metaItem')}>난이도: {recipe.difficulty}</span>

@@ -12,6 +12,11 @@ export class UsersController {
     return this.usersService.getSavedRecipes(req.user.id);
   }
 
+  @Get('recipes/:recipeId/saved')
+  isRecipeSaved(@Req() req: any, @Param('recipeId') recipeId: string) {
+    return this.usersService.isRecipeSaved(req.user.id, recipeId);
+  }
+
   @Post('recipes/:recipeId/save')
   saveRecipe(@Req() req: any, @Param('recipeId') recipeId: string) {
     return this.usersService.saveRecipe(req.user.id, recipeId);

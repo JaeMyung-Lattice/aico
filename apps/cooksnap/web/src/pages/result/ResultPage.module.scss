@@ -42,13 +42,54 @@
   margin-bottom: $spacing-xl;
 }
 
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-md;
+}
+
 .title {
   font-size: 28px;
   font-weight: 800;
   margin-bottom: $spacing-sm;
+  flex: 1;
 
   @include tablet {
     font-size: 22px;
+  }
+}
+
+.saveButton {
+  @include button-reset;
+  flex-shrink: 0;
+  padding: $spacing-sm $spacing-md;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: $radius-sm;
+  border: 1px solid rgba($primary, 0.3);
+  color: $primary;
+  background-color: transparent;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: rgba($primary, 0.05);
+    border-color: $primary;
+  }
+
+  &.saved {
+    background-color: $primary;
+    color: #fff;
+    border-color: $primary;
+
+    &:hover {
+      background-color: $primary-dark;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    pointer-events: none;
   }
 }
 

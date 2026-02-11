@@ -24,6 +24,15 @@ export class UsersService {
     });
   };
 
+  // 레시피 저장 여부 확인
+  isRecipeSaved = async (userId: string, recipeId: string) => {
+    const record = await this.prisma.savedRecipe.findUnique({
+      where: { userId_recipeId: { userId, recipeId } },
+      select: { id: true },
+    });
+    return { saved: !!record };
+  };
+
   // 레시피 저장
   saveRecipe = async (userId: string, recipeId: string) => {
     // 레시피 존재 확인

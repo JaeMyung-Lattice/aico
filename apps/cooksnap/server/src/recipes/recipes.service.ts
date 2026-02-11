@@ -20,7 +20,7 @@ export class RecipesService {
   ) {}
 
   // 영상 URL 분석 → 레시피 생성
-  analyze = async (url: string): Promise<{ id: string }> => {
+  analyze = async (url: string, userId: string | null = null): Promise<{ id: string }> => {
     // 이미 분석된 URL인지 확인 (중복 방지)
     const existing = await this.prisma.recipe.findFirst({
       where: { videoUrl: url },
@@ -29,6 +29,7 @@ export class RecipesService {
 
     if (existing) {
       this.logger.log(`이미 분석된 URL: ${url} → ${existing.id}`);
+      await this.createHistory(existing.id, url, userId);
       return { id: existing.id };
     }
 
@@ -70,8 +71,28 @@ export class RecipesService {
     });
 
     this.logger.log(`레시피 생성 완료: ${recipe.id} - ${recipe.title}`);
+    await this.createHistory(recipe.id, url, userId);
 
     return { id: recipe.id };
+  };
+
+  // 분석 히스토리 기록 (로그인 사용자만, 중복 방지)
+  private createHistory = async (recipeId: string, videoUrl: string, userId: string | null) => {
+    if (!userId) return;
+
+    try {
+      const existing = await this.prisma.analysisHistory.findFirst({
+        where: { userId, recipeId },
+        select: { id: true },
+      });
+      if (existing) return;
+
+      await this.prisma.analysisHistory.create({
+        data: { recipeId, videoUrl, userId },
+      });
+    } catch (error) {
+      this.logger.warn(`히스토리 기록 실패: ${error}`);
+    }
   };
 
   // 레시피 상세 조회
