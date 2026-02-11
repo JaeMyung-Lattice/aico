@@ -12,9 +12,10 @@
   max-width: 400px;
   background-color: $surface;
   border-radius: $radius-lg;
-  padding: $spacing-xxl $spacing-xl;
+  padding: $spacing-xxl $spacing-2xl;
   box-shadow: $shadow-md;
   text-align: center;
+  border: 1px solid rgba($border, 0.4);
 }
 
 .title {
@@ -42,14 +43,24 @@
   justify-content: center;
   gap: $spacing-sm;
   width: 100%;
-  padding: $spacing-md;
+  padding: 18px;
   border-radius: $radius-md;
   font-size: 15px;
   font-weight: 600;
-  transition: opacity 0.2s;
+  transition: $transition-base;
 
   &:hover {
-    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    pointer-events: none;
   }
 }
 
@@ -61,14 +72,19 @@
 .googleButton {
   background-color: $surface;
   color: $text-primary;
-  border: 1px solid $border;
+  border: 1px solid rgba($border, 0.8);
+
+  &:hover {
+    border-color: $border;
+  }
 }
 
 .freeNotice {
   margin-top: $spacing-xl;
-  padding: $spacing-md;
-  background-color: $background;
+  padding: $spacing-md $spacing-lg;
+  background-color: rgba($primary, 0.04);
   border-radius: $radius-md;
   font-size: 13px;
   color: $text-secondary;
+  border: 1px solid rgba($primary, 0.08);
 }

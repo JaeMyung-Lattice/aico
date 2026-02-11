@@ -47,3 +47,13 @@
   padding: 0;
   font: inherit;
 }
+
+// 카드 호버 상승 효과 (LINE 스타일)
+@mixin hover-lift {
+  transition: $transition-base;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: $shadow-hover;
+  }
+}

@@ -7,14 +7,11 @@ import axios from 'axios';
 export interface PurchaseLinkResult {
   ingredientId: string;
   ingredientName: string;
-  productName: string | null;
-  price: number | null;
-  imageUrl: string | null;
   purchaseUrl: string;
 }
 
-// 쿠팡 상품 캐시 (24시간 TTL)
-const productCache = new Map<string, { data: PurchaseLinkResult; expiry: number }>();
+// 딥링크 캐시 (24시간 TTL)
+const deepLinkCache = new Map<string, { url: string; expiry: number }>();
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24시간
 
 @Injectable()
@@ -44,98 +41,83 @@ export class CoupangService {
 
     for (const ingredient of recipe.ingredients) {
       // 캐시 확인
-      const cached = productCache.get(ingredient.name);
+      const cached = deepLinkCache.get(ingredient.name);
       if (cached && cached.expiry > Date.now()) {
-        results.push({ ...cached.data, ingredientId: ingredient.id });
+        results.push({
+          ingredientId: ingredient.id,
+          ingredientName: ingredient.name,
+          purchaseUrl: cached.url,
+        });
         continue;
       }
 
-      // MVP 초기: 쿠팡 검색 URL 직접 생성 (API 활성화 전)
+      // 쿠팡 검색 URL 생성
       const searchUrl = this.generateSearchUrl(ingredient.name);
 
-      const result: PurchaseLinkResult = {
-        ingredientId: ingredient.id,
-        ingredientName: ingredient.name,
-        productName: null,
-        price: null,
-        imageUrl: null,
-        purchaseUrl: searchUrl,
-      };
-
-      // 쿠팡파트너스 API가 활성화된 경우 상품 검색
+      // Deep Link API로 어필리에이트 추적 링크 변환
+      let purchaseUrl = searchUrl;
       if (this.accessKey && this.secretKey) {
         try {
-          const product = await this.searchProduct(ingredient.name);
-          if (product) {
-            result.productName = product.productName;
-            result.price = product.price;
-            result.imageUrl = product.imageUrl;
-            result.purchaseUrl = product.purchaseUrl;
+          const deepLink = await this.generateDeepLink(searchUrl);
+          if (deepLink) {
+            purchaseUrl = deepLink;
           }
         } catch {
-          this.logger.warn(`쿠팡 검색 실패: ${ingredient.name}`);
+          this.logger.warn(`딥링크 변환 실패: ${ingredient.name}, 일반 검색 URL 사용`);
         }
       }
 
-      productCache.set(ingredient.name, { data: result, expiry: Date.now() + CACHE_TTL });
+      deepLinkCache.set(ingredient.name, { url: purchaseUrl, expiry: Date.now() + CACHE_TTL });
 
       // DB에 구매 링크 저장
       await this.prisma.ingredient.update({
         where: { id: ingredient.id },
-        data: { coupangProductUrl: result.purchaseUrl },
+        data: { coupangProductUrl: purchaseUrl },
       });
 
-      results.push(result);
+      results.push({
+        ingredientId: ingredient.id,
+        ingredientName: ingredient.name,
+        purchaseUrl,
+      });
     }
 
     return results;
   };
 
-  // 쿠팡 검색 URL 직접 생성 (MVP 초기 전략)
+  // 쿠팡 검색 URL 생성
   private generateSearchUrl = (keyword: string): string => {
     const encoded = encodeURIComponent(keyword);
     return `https://www.coupang.com/np/search?component=&q=${encoded}`;
   };
 
-  // 쿠팡파트너스 Search API 호출
-  private searchProduct = async (keyword: string): Promise<{
-    productName: string;
-    price: number;
-    imageUrl: string;
-    purchaseUrl: string;
-  } | null> => {
-    const path = '/v2/providers/affiliate_open_api/apis/openapi/products/search';
-    const method = 'GET';
-
-    const signature = this.generateSignature(method, path);
+  // 쿠팡파트너스 Deep Link API (2단계에서 사용 가능)
+  private generateDeepLink = async (originalUrl: string): Promise<string | null> => {
+    const path = '/v2/providers/affiliate_open_api/apis/openapi/v1/deeplink';
+    const method = 'POST';
+    const authorization = this.generateSignature(method, path);
 
     try {
-      const response = await axios.get(`https://api-gateway.coupang.com${path}`, {
-        params: {
-          keyword,
-          limit: 1,
+      const response = await axios.post(
+        `https://api-gateway.coupang.com${path}`,
+        { coupangUrls: [originalUrl] },
+        {
+          headers: {
+            Authorization: authorization,
+            'Content-Type': 'application/json',
+          },
+          timeout: 5000,
         },
-        headers: {
-          Authorization: signature,
-          'Content-Type': 'application/json',
-        },
-        timeout: 5000,
-      });
+      );
 
-      const products = response.data?.data?.productData;
-      if (products?.length > 0) {
-        const product = products[0];
-        return {
-          productName: product.productName,
-          price: product.productPrice,
-          imageUrl: product.productImage,
-          purchaseUrl: product.productUrl,
-        };
+      const links = response.data?.data;
+      if (links?.length > 0) {
+        return links[0].shortenUrl;
       }
 
       return null;
     } catch (error) {
-      this.logger.error(`쿠팡 API 호출 실패: ${keyword}`, error);
+      this.logger.error('Deep Link API 호출 실패', error);
       return null;
     }
   };

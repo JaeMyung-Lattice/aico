@@ -17,52 +17,57 @@
   display: flex;
   gap: $spacing-sm;
   margin-bottom: $spacing-xl;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid rgba($border, 0.6);
 }
 
 .tab {
   @include button-reset;
-  padding: $spacing-sm $spacing-md;
+  padding: 10px $spacing-md;
   font-size: 15px;
   font-weight: 600;
   color: $text-secondary;
   border-bottom: 2px solid transparent;
-  transition: all 0.2s;
+  transition: $transition-base;
 
   &.active {
     color: $primary;
     border-bottom-color: $primary;
+  }
+
+  &:hover:not(.active) {
+    color: $text-primary;
   }
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: $spacing-md;
+  gap: $spacing-lg;
 }
 
 .recipeCard {
   background-color: $surface;
   border-radius: $radius-md;
-  border: 1px solid $border;
+  border: 1px solid rgba($border, 0.6);
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  @include hover-lift;
+  box-shadow: $shadow-sm;
 
   &:hover {
-    box-shadow: $shadow-md;
+    border-color: rgba($border, 0.3);
   }
 }
 
 .cardThumbnail {
   width: 100%;
-  height: 160px;
+  height: 180px;
   background-color: $border;
   object-fit: cover;
 }
 
 .cardBody {
-  padding: $spacing-md;
+  padding: $spacing-md $spacing-lg;
 }
 
 .cardTitle {
@@ -87,4 +92,5 @@
   text-align: center;
   padding: $spacing-xxl;
   color: $text-secondary;
+  grid-column: 1 / -1;
 }

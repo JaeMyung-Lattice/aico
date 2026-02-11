@@ -1,5 +1,12 @@
 @use 'variables' as *;
 
+:root {
+  --loading-dot-color: #{$primary};
+  --loading-dot-color-light: #{$primary-light};
+  --loading-message-color: #{$text-secondary};
+  --loading-gap: #{$spacing-lg};
+}
+
 *,
 *::before,
 *::after {
@@ -19,11 +26,13 @@ body {
   color: $text-primary;
   background-color: $background;
   line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+  transition: $transition-fast;
 }
 
 ul,
@@ -33,6 +42,7 @@ ol {
 
 button {
   cursor: pointer;
+  transition: $transition-base;
 }
 
 img {

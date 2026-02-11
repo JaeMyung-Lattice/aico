@@ -1,13 +1,13 @@
 // 색상
-$primary: #ff6b35;
-$primary-light: #ff8c5a;
-$primary-dark: #e55a25;
+$primary: #ff7a45;
+$primary-light: #ff9a6c;
+$primary-dark: #ee6835;
 $secondary: #2d3436;
-$background: #fafafa;
+$background: #f8f9fa;
 $surface: #ffffff;
 $text-primary: #2d3436;
-$text-secondary: #636e72;
-$border: #dfe6e9;
+$text-secondary: #6b7684;
+$border: #e8ecef;
 $error: #d63031;
 $success: #00b894;
 
@@ -26,15 +26,21 @@ $spacing-sm: 8px;
 $spacing-md: 16px;
 $spacing-lg: 24px;
 $spacing-xl: 32px;
+$spacing-2xl: 40px;
 $spacing-xxl: 48px;
 
 // 그림자
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+$shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
 
 // 둥글기
-$radius-sm: 6px;
-$radius-md: 12px;
-$radius-lg: 16px;
+$radius-sm: 8px;
+$radius-md: 16px;
+$radius-lg: 20px;
 $radius-full: 9999px;
+
+// 트랜지션
+$transition-base: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);

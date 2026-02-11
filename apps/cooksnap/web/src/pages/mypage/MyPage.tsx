@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
+import { Loading } from '@repo/ui'
 import type { SavedRecipe, AnalysisHistoryItem } from '@/types/user'
 import styles from './MyPage.module.scss'
 
@@ -14,7 +15,7 @@ const MyPage = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('saved')
 
-  const { data: savedRecipes = [] } = useQuery<SavedRecipe[]>({
+  const { data: savedRecipes = [], isLoading: isSavedLoading } = useQuery<SavedRecipe[]>({
     queryKey: ['my-recipes'],
     queryFn: async () => {
       const { data } = await api.get('/users/me/recipes')
@@ -22,7 +23,7 @@ const MyPage = () => {
     },
   })
 
-  const { data: history = [] } = useQuery<AnalysisHistoryItem[]>({
+  const { data: history = [], isLoading: isHistoryLoading } = useQuery<AnalysisHistoryItem[]>({
     queryKey: ['my-history'],
     queryFn: async () => {
       const { data } = await api.get('/users/me/history')
@@ -30,8 +31,14 @@ const MyPage = () => {
     },
   })
 
+  const isLoading = isSavedLoading || isHistoryLoading
+
   const handleRecipeClick = (recipeId: string) => {
     navigate(`/result/${recipeId}`)
+  }
+
+  if (isLoading) {
+    return <Loading message="데이터를 불러오는 중..." />
   }
 
   return (

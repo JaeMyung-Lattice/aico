@@ -11,18 +11,6 @@
   }
 }
 
-.loading {
-  @include flex-center;
-  min-height: 400px;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.loadingText {
-  color: $text-secondary;
-  font-size: 16px;
-}
-
 .error {
   @include flex-center;
   min-height: 400px;
@@ -37,11 +25,17 @@
 
 .retryButton {
   @include button-reset;
-  padding: $spacing-sm $spacing-lg;
+  padding: 10px $spacing-xl;
   background-color: $primary;
   color: #fff;
   border-radius: $radius-md;
   font-weight: 600;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: $primary-dark;
+    transform: translateY(-1px);
+  }
 }
 
 .header {
@@ -73,12 +67,13 @@
 }
 
 .priceCard {
-  background-color: $primary;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
   color: #fff;
   border-radius: $radius-lg;
-  padding: $spacing-lg;
+  padding: $spacing-xl $spacing-lg;
   margin-bottom: $spacing-xl;
   text-align: center;
+  box-shadow: 0 8px 24px rgba($primary, 0.2);
 }
 
 .totalPrice {
@@ -103,9 +98,10 @@
 .sectionTitle {
   font-size: 20px;
   font-weight: 700;
-  margin-bottom: $spacing-md;
+  margin-bottom: $spacing-lg;
   padding-bottom: $spacing-sm;
-  border-bottom: 2px solid $border;
+  border-bottom: 2px solid rgba($border, 0.6);
+  letter-spacing: -0.01em;
 
   @include mobile {
     font-size: 18px;
@@ -122,10 +118,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-md;
+  padding: $spacing-md $spacing-lg;
   background-color: $surface;
   border-radius: $radius-md;
-  border: 1px solid $border;
+  border: 1px solid rgba($border, 0.6);
+  transition: $transition-fast;
+
+  &:hover {
+    box-shadow: $shadow-sm;
+    border-color: rgba($border, 0.8);
+  }
 
   @include mobile {
     padding: $spacing-sm $spacing-md;
@@ -159,18 +161,19 @@
 }
 
 .coupangLink {
-  padding: $spacing-xs $spacing-sm;
+  padding: 6px 12px;
   background-color: $background;
-  color: $text-primary;
+  color: $primary;
   font-size: 12px;
   font-weight: 600;
   border-radius: $radius-sm;
   text-decoration: none;
-  border: 1px solid $border;
-  transition: background-color 0.2s;
+  border: 1px solid rgba($primary, 0.2);
+  transition: $transition-fast;
 
   &:hover {
-    background-color: $border;
+    background-color: rgba($primary, 0.05);
+    border-color: rgba($primary, 0.4);
   }
 }
 
@@ -183,31 +186,33 @@
 .stepItem {
   display: flex;
   gap: $spacing-md;
-  padding: $spacing-md;
+  padding: $spacing-lg $spacing-md;
   background-color: $surface;
   border-radius: $radius-md;
-  border: 1px solid $border;
+  border: 1px solid rgba($border, 0.6);
 
   @include mobile {
     gap: $spacing-sm;
+    padding: $spacing-md $spacing-sm;
   }
 }
 
 .stepNumber {
   @include flex-center;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  background-color: $primary;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
   color: #fff;
   border-radius: 50%;
   font-size: 14px;
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba($primary, 0.2);
 
   @include mobile {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
     font-size: 12px;
   }
 }
@@ -217,15 +222,37 @@
   line-height: 1.6;
 }
 
+.coupangBanner {
+  @include flex-center;
+  flex-direction: column;
+  margin-bottom: $spacing-xl;
+  padding: $spacing-lg;
+
+  iframe {
+    max-width: 100%;
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+  }
+}
+
+.disclaimer {
+  margin-top: $spacing-sm;
+  font-size: 11px;
+  color: $text-secondary;
+  text-align: center;
+  line-height: 1.5;
+}
+
 .stickyBottom {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   padding: $spacing-md;
-  background-color: $surface;
-  border-top: 1px solid $border;
-  box-shadow: $shadow-lg;
+  background-color: rgba($surface, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba($border, 0.5);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
   z-index: 50;
 }
 
@@ -234,17 +261,24 @@
   width: 100%;
   max-width: $wide;
   margin: 0 auto;
-  padding: $spacing-md;
-  background-color: $primary;
+  padding: 18px;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
   color: #fff;
   font-size: 16px;
   font-weight: 700;
   border-radius: $radius-md;
   text-align: center;
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: $transition-base;
+  box-shadow: 0 4px 12px rgba($primary, 0.25);
 
   &:hover {
-    background-color: $primary-dark;
+    background: linear-gradient(135deg, $primary-dark 0%, $primary 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba($primary, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }

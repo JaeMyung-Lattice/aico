@@ -42,9 +42,6 @@ export interface PriceInfo {
 export interface PurchaseLink {
   ingredientId: string
   ingredientName: string
-  productName: string
-  price: number | null
-  imageUrl: string | null
   purchaseUrl: string
 }
 

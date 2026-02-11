@@ -2,7 +2,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
-import type { Recipe } from '@/types/recipe'
+import { Loading } from '@repo/ui'
+import type { Recipe, PurchaseLink } from '@/types/recipe'
 import styles from './ResultPage.module.scss'
 
 const cx = classnames.bind(styles)
@@ -10,10 +11,6 @@ const cx = classnames.bind(styles)
 const formatPrice = (price: number | null): string => {
   if (price === null) return '-'
   return `${price.toLocaleString()}원`
-}
-
-const getCoupangSearchUrl = (keyword: string): string => {
-  return `https://www.coupang.com/np/search?q=${encodeURIComponent(keyword)}`
 }
 
 const Result = () => {
@@ -29,14 +26,25 @@ const Result = () => {
     enabled: !!id,
   })
 
+  // 구매 링크 조회 (레시피 로딩 완료 후)
+  const { data: purchaseLinks } = useQuery<PurchaseLink[]>({
+    queryKey: ['purchaseLinks', id],
+    queryFn: async () => {
+      const { data } = await api.get(`/recipes/${id}/purchase-links`)
+      return data
+    },
+    enabled: !!recipe,
+  })
+
+  // 재료별 구매 링크 매핑
+  const getLinkForIngredient = (ingredientId: string): string | null => {
+    if (!purchaseLinks) return null
+    const link = purchaseLinks.find((l) => l.ingredientId === ingredientId)
+    return link?.purchaseUrl || null
+  }
+
   if (isLoading) {
-    return (
-      <div className={cx('result')}>
-        <div className={cx('loading')}>
-          <p className={cx('loadingText')}>레시피를 불러오는 중...</p>
-        </div>
-      </div>
-    )
+    return <Loading message="레시피를 불러오는 중..." />
   }
 
   if (error || !recipe) {
@@ -86,33 +94,38 @@ const Result = () => {
       <div className={cx('section')}>
         <h2 className={cx('sectionTitle')}>재료</h2>
         <div className={cx('ingredientList')}>
-          {recipe.ingredients.map((ingredient) => (
-            <div key={ingredient.id} className={cx('ingredientItem')}>
-              <div className={cx('ingredientInfo')}>
-                <span className={cx('ingredientName')}>{ingredient.name}</span>
-                {ingredient.amount && (
-                  <span className={cx('ingredientAmount')}>
-                    {' '}
-                    {ingredient.amount}
-                    {ingredient.unit || ''}
+          {recipe.ingredients.map((ingredient) => {
+            const purchaseUrl = getLinkForIngredient(ingredient.id)
+            return (
+              <div key={ingredient.id} className={cx('ingredientItem')}>
+                <div className={cx('ingredientInfo')}>
+                  <span className={cx('ingredientName')}>{ingredient.name}</span>
+                  {ingredient.amount && (
+                    <span className={cx('ingredientAmount')}>
+                      {' '}
+                      {ingredient.amount}
+                      {ingredient.unit || ''}
+                    </span>
+                  )}
+                </div>
+                <div className={cx('ingredientActions')}>
+                  <span className={cx('ingredientPrice')}>
+                    {formatPrice(ingredient.estimatedPrice)}
                   </span>
-                )}
+                  {purchaseUrl && (
+                    <a
+                      href={purchaseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cx('coupangLink')}
+                    >
+                      구매
+                    </a>
+                  )}
+                </div>
               </div>
-              <div className={cx('ingredientActions')}>
-                <span className={cx('ingredientPrice')}>
-                  {formatPrice(ingredient.estimatedPrice)}
-                </span>
-                <a
-                  href={getCoupangSearchUrl(ingredient.name)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cx('coupangLink')}
-                >
-                  구매
-                </a>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -129,17 +142,36 @@ const Result = () => {
         </div>
       </div>
 
-      {/* 쿠팡에서 재료 검색 (sticky) */}
-      <div className={cx('stickyBottom')}>
-        <a
-          href={getCoupangSearchUrl(recipe.ingredients.map((i) => i.name).join(' '))}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cx('cartButton')}
-        >
-          쿠팡에서 재료 한번에 검색하기
-        </a>
+      {/* 쿠팡 파트너스 배너 */}
+      <div className={cx('coupangBanner')}>
+        <iframe
+          src="https://ads-partners.coupang.com/widgets.html?id=964330&template=carousel&trackingCode=AF5330853&subId=&width=320&height=320&tsource="
+          width="320"
+          height="320"
+          frameBorder="0"
+          scrolling="no"
+          referrerPolicy="unsafe-url"
+          title="쿠팡 파트너스 추천 상품"
+        />
+        <p className={cx('disclaimer')}>
+          이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를
+          제공받습니다.
+        </p>
       </div>
+
+      {/* 쿠팡에서 재료 구매 (sticky) */}
+      {purchaseLinks?.[0] && (
+        <div className={cx('stickyBottom')}>
+          <a
+            href={purchaseLinks[0].purchaseUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cx('cartButton')}
+          >
+            쿠팡에서 재료 구매하기
+          </a>
+        </div>
+      )}
     </div>
   )
 }

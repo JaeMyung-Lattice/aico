@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import classnames from 'classnames/bind'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { Loading } from '@repo/ui'
 import styles from './Header.module.scss'
 
 const cx = classnames.bind(styles)
@@ -30,16 +31,23 @@ const Header = () => {
     navigate('/auth')
   }
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
   const handleLogout = async () => {
+    setIsLoggingOut(true)
     await signOut()
+    setIsLoggingOut(false)
     setMenuOpen(false)
     navigate('/')
   }
 
   return (
+    <>
+    <Loading overlay loading={isLoggingOut} message="로그아웃 중..." />
     <header className={cx('header')}>
       <div className={cx('inner')}>
         <div className={cx('logo')} onClick={handleLogoClick}>
+          <img src="/logo.png" alt="CookSnap" className={cx('logoImage')} />
           Cook<span>Snap</span>
         </div>
         <nav className={cx('nav')}>
@@ -53,7 +61,7 @@ const Header = () => {
                   <button onClick={() => { navigate('/mypage'); setMenuOpen(false) }}>
                     마이페이지
                   </button>
-                  <button onClick={handleLogout}>
+                  <button onClick={handleLogout} disabled={isLoggingOut}>
                     로그아웃
                   </button>
                 </div>
@@ -67,6 +75,7 @@ const Header = () => {
         </nav>
       </div>
     </header>
+    </>
   )
 }
 

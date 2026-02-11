@@ -6,7 +6,7 @@
   top: 0;
   z-index: 100;
   background-color: $surface;
-  border-bottom: 1px solid $border;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
   height: 56px;
 }
 
@@ -19,6 +19,9 @@
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 20px;
   font-weight: 700;
   color: $primary;
@@ -29,6 +32,12 @@
   }
 }
 
+.logoImage {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -37,16 +46,18 @@
 
 .loginButton {
   @include button-reset;
-  padding: $spacing-sm $spacing-md;
+  padding: $spacing-sm $spacing-lg;
   border-radius: $radius-full;
   background-color: $primary;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
-  transition: background-color 0.2s;
+  transition: $transition-base;
 
   &:hover {
     background-color: $primary-dark;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($primary, 0.3);
   }
 }
 
@@ -56,27 +67,33 @@
 
 .profileButton {
   @include button-reset;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: $primary-light;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
   @include flex-center;
+  transition: $transition-fast;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .dropdown {
   position: absolute;
-  top: calc(100% + $spacing-xs);
+  top: calc(100% + $spacing-sm);
   right: 0;
   background-color: $surface;
-  border: 1px solid $border;
+  border: 1px solid rgba($border, 0.5);
   border-radius: $radius-md;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 120px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  min-width: 140px;
   overflow: hidden;
   z-index: 200;
+  animation: dropdownFade 0.15s ease;
 
   button {
     @include button-reset;
@@ -86,13 +103,31 @@
     font-size: 14px;
     color: $text-primary;
     text-align: left;
+    transition: $transition-fast;
 
     &:hover {
       background-color: $background;
     }
 
+    &:disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
     &:last-child {
       color: $error;
     }
+  }
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

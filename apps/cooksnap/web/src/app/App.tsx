@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { router } from './Router'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { Loading } from '@repo/ui'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,11 +15,15 @@ const queryClient = new QueryClient({
 })
 
 const App = () => {
-  const { initialize } = useAuthStore()
+  const { initialize, isLoading } = useAuthStore()
 
   useEffect(() => {
     initialize()
   }, [initialize])
+
+  if (isLoading) {
+    return <Loading fullPage />
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
