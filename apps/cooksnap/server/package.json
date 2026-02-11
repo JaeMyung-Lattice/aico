@@ -6,7 +6,7 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main",
-    "start:prod": "node dist/main",
+    "start:prod": "prisma migrate deploy && node dist/main",
     "lint": "eslint --max-warnings 0",
     "check-types": "tsc --noEmit",
     "prisma:migrate": "prisma migrate dev",
