@@ -7,25 +7,95 @@
   padding-bottom: $spacing-xxl;
 }
 
-.pageHeader {
+.profileCard {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
   margin-bottom: $spacing-xl;
+  background-color: $surface;
+  border: 1px solid rgba($border, 0.6);
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
 }
 
-.title {
-  font-size: 24px;
-  font-weight: 800;
+.profileAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  @include flex-center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.profileInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.profileNameRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.profileName {
+  font-size: 18px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.profileEmail {
+  font-size: 13px;
+  color: $text-secondary;
+  margin-top: 2px;
+}
+
+.subscriptionInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-top: $spacing-xs;
+}
+
+.subscriptionText {
+  font-size: 12px;
+  color: $text-secondary;
+
+  &.cancelled {
+    color: #b45309;
+  }
+}
+
+.cancelButton {
+  @include button-reset;
+  font-size: 12px;
+  color: $text-secondary;
+  text-decoration: underline;
+  transition: $transition-fast;
+
+  &:hover {
+    color: $error;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
 }
 
 .premiumBadge {
-  padding: 6px $spacing-md;
-  font-size: 13px;
+  padding: 3px 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: $primary;
-  background-color: rgba($primary, 0.08);
+  color: #fff;
+  background: linear-gradient(135deg, #d4a017 0%, #f5c842 100%);
   border-radius: $radius-full;
+  letter-spacing: 0.3px;
 }
 
 .upgradeButton {
@@ -37,6 +107,8 @@
   background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
   border-radius: $radius-sm;
   transition: $transition-base;
+  flex-shrink: 0;
+  white-space: nowrap;
 
   &:hover {
     transform: translateY(-1px);

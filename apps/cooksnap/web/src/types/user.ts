@@ -38,3 +38,9 @@ export interface AnalysisHistoryItem {
   }
   createdAt: string
 }
+
+export interface SubscriptionInfo {
+  hasSubscription: boolean
+  status: 'ACTIVE' | 'CANCELLED' | null
+  currentPeriodEnd: string | null
+}

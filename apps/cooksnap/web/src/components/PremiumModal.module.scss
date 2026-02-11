@@ -97,6 +97,16 @@
   color: $text-secondary;
 }
 
+.error {
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  font-size: 13px;
+  color: $error;
+  background-color: rgba($error, 0.08);
+  border-radius: $radius-sm;
+  text-align: center;
+}
+
 .subscribeButton {
   @include button-reset;
   display: block;

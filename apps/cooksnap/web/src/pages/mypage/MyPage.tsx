@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
 import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Loading } from '@repo/ui'
 import PremiumModal from '@/components/PremiumModal'
-import type { SavedRecipe, AnalysisHistoryItem } from '@/types/user'
+import type { SavedRecipe, AnalysisHistoryItem, SubscriptionInfo } from '@/types/user'
 import styles from './MyPage.module.scss'
 
 const cx = classnames.bind(styles)
@@ -16,11 +16,13 @@ type Tab = 'saved' | 'history'
 
 const MyPage = () => {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const queryClient = useQueryClient()
+  const { user, initialize } = useAuthStore()
   const [activeTab, setActiveTab] = useState<Tab>('saved')
   const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
 
-  const { data: savedRecipes = [], isLoading: isSavedLoading } = useQuery<SavedRecipe[]>({
+  const { data: savedRecipes = [], isFetching: isSavedFetching } = useQuery<SavedRecipe[]>({
     queryKey: ['my-recipes'],
     queryFn: async () => {
       const { data } = await api.get('/users/me/recipes')
@@ -28,7 +30,7 @@ const MyPage = () => {
     },
   })
 
-  const { data: history = [], isLoading: isHistoryLoading } = useQuery<AnalysisHistoryItem[]>({
+  const { data: history = [], isFetching: isHistoryFetching } = useQuery<AnalysisHistoryItem[]>({
     queryKey: ['my-history'],
     queryFn: async () => {
       const { data } = await api.get('/users/me/history')
@@ -36,14 +38,40 @@ const MyPage = () => {
     },
   })
 
-  const isLoading = isSavedLoading || isHistoryLoading
+  const { data: subscription } = useQuery<SubscriptionInfo>({
+    queryKey: ['subscription-status'],
+    queryFn: async () => {
+      const { data } = await api.get('/payments/status')
+      return data
+    },
+    enabled: !!user?.isPremium,
+  })
 
   const handleRecipeClick = (recipeId: string) => {
     navigate(`/result/${recipeId}`)
   }
 
-  if (isLoading) {
-    return <Loading message="데이터를 불러오는 중..." />
+  const handleCancelSubscription = async () => {
+    if (!confirm('정말 구독을 해지하시겠습니까?\n현재 결제 기간이 끝날 때까지 프리미엄을 이용할 수 있습니다.')) return
+
+    setIsCancelling(true)
+    try {
+      await api.post('/payments/cancel')
+      await queryClient.invalidateQueries({ queryKey: ['subscription-status'] })
+      await initialize()
+    } catch {
+      alert('구독 해지에 실패했습니다.')
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
   }
 
   return (
@@ -52,11 +80,45 @@ const MyPage = () => {
         <title>마이페이지 - CookSnap</title>
         <meta name="robots" content="noindex" />
       </Helmet>
-      <div className={cx('pageHeader')}>
-        <h1 className={cx('title')}>마이페이지</h1>
-        {user?.isPremium ? (
-          <span className={cx('premiumBadge')}>Premium</span>
-        ) : (
+      <div className={cx('profileCard')}>
+        <div className={cx('profileAvatar')}>
+          {user?.nickname?.[0] || user?.email[0] || '?'}
+        </div>
+        <div className={cx('profileInfo')}>
+          <div className={cx('profileNameRow')}>
+            <span className={cx('profileName')}>
+              {user?.nickname || user?.email.split('@')[0]}
+            </span>
+            {user?.isPremium && (
+              <span className={cx('premiumBadge')}>Premium</span>
+            )}
+          </div>
+          <p className={cx('profileEmail')}>{user?.email}</p>
+          {user?.isPremium && subscription?.hasSubscription && (
+            <div className={cx('subscriptionInfo')}>
+              {subscription.status === 'ACTIVE' && subscription.currentPeriodEnd && (
+                <>
+                  <span className={cx('subscriptionText')}>
+                    다음 갱신일: {formatDate(subscription.currentPeriodEnd)}
+                  </span>
+                  <button
+                    className={cx('cancelButton')}
+                    onClick={handleCancelSubscription}
+                    disabled={isCancelling}
+                  >
+                    {isCancelling ? '처리 중...' : '구독 해지'}
+                  </button>
+                </>
+              )}
+              {subscription.status === 'CANCELLED' && subscription.currentPeriodEnd && (
+                <span className={cx('subscriptionText', 'cancelled')}>
+                  {formatDate(subscription.currentPeriodEnd)}까지 프리미엄 유지
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        {!user?.isPremium && (
           <button
             className={cx('upgradeButton')}
             onClick={() => setShowPremiumModal(true)}
@@ -83,7 +145,9 @@ const MyPage = () => {
 
       {activeTab === 'saved' && (
         <div className={cx('grid')}>
-          {savedRecipes.length === 0 ? (
+          {isSavedFetching && savedRecipes.length === 0 ? (
+            <Loading message="저장된 레시피를 불러오는 중..." />
+          ) : savedRecipes.length === 0 ? (
             <div className={cx('empty')}>저장된 레시피가 없습니다.</div>
           ) : (
             savedRecipes.map((item) => (
@@ -118,7 +182,9 @@ const MyPage = () => {
 
       {activeTab === 'history' && (
         <div className={cx('historyList')}>
-          {history.length === 0 ? (
+          {isHistoryFetching && history.length === 0 ? (
+            <Loading message="분석 히스토리를 불러오는 중..." />
+          ) : history.length === 0 ? (
             <div className={cx('empty')}>분석 히스토리가 없습니다.</div>
           ) : (
             history.map((item) => (

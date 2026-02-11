@@ -68,17 +68,6 @@
   gap: $spacing-xs;
 }
 
-.premiumBadge {
-  width: 20px;
-  height: 20px;
-  @include flex-center;
-  font-size: 10px;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, $primary 0%, $primary-light 100%);
-  border-radius: 50%;
-}
-
 .profileButton {
   @include button-reset;
   width: 36px;
@@ -90,6 +79,27 @@
   font-weight: 600;
   @include flex-center;
   transition: $transition-fast;
+
+  &.premium {
+    position: relative;
+    box-shadow: 0 0 0 2.5px $surface, 0 0 0 5px #eab308;
+
+    &::after {
+      content: '★';
+      position: absolute;
+      bottom: -3px;
+      right: -3px;
+      width: 16px;
+      height: 16px;
+      background: linear-gradient(135deg, #d4a017 0%, #f5c842 100%);
+      border: 2px solid $surface;
+      border-radius: 50%;
+      font-size: 8px;
+      line-height: 12px;
+      text-align: center;
+      color: #fff;
+    }
+  }
 
   &:hover {
     transform: scale(1.05);
@@ -145,3 +155,4 @@
     transform: translateY(0);
   }
 }
+

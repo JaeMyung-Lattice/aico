@@ -7,6 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
 model User {
   id               String    @id @default(uuid())
   email            String
@@ -21,6 +35,8 @@ model User {
   savedRecipes    SavedRecipe[]
   analysisHistory AnalysisHistory[]
   dailyUsages     DailyUsage[]
+  subscriptions   Subscription[]
+  payments        Payment[]
 
   @@unique([provider, providerId])
   @@map("users")
@@ -115,4 +131,37 @@ model DailyUsage {
 
   @@unique([userId, date])
   @@map("daily_usages")
+}
+
+model Subscription {
+  id               String             @id @default(uuid())
+  userId           String             @map("user_id")
+  billingKey       String             @map("billing_key")
+  status           SubscriptionStatus @default(ACTIVE)
+  currentPeriodEnd DateTime           @map("current_period_end")
+  cancelledAt      DateTime?          @map("cancelled_at")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id               String        @id @default(uuid())
+  userId           String        @map("user_id")
+  subscriptionId   String?       @map("subscription_id")
+  amount           Int
+  status           PaymentStatus @default(PENDING)
+  portonePaymentId String?       @unique @map("portone_payment_id")
+  failReason       String?       @map("fail_reason")
+  paidAt           DateTime?     @map("paid_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@map("payments")
 }

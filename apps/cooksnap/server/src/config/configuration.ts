@@ -18,6 +18,11 @@ const configuration = () => ({
     url: process.env.SUPABASE_URL,
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
   },
+  portone: {
+    storeId: process.env.PORTONE_STORE_ID,
+    apiSecret: process.env.PORTONE_API_SECRET,
+    channelKey: process.env.PORTONE_CHANNEL_KEY,
+  },
 });
 
 export default configuration;
