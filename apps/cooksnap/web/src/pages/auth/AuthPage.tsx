@@ -14,7 +14,7 @@ const isInAppBrowser = (): boolean => {
 const isIOS = (): boolean => /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 const Auth = () => {
-  const { signInWithGoogle } = useAuthStore();
+  const { signInWithGoogle, signInWithKakao } = useAuthStore();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [copied, setCopied] = useState(false);
   const inApp = isInAppBrowser();
@@ -23,6 +23,11 @@ const Auth = () => {
     if (inApp) return;
     setIsSigningIn(true);
     await signInWithGoogle();
+  };
+
+  const handleKakaoLogin = async () => {
+    setIsSigningIn(true);
+    await signInWithKakao();
   };
 
   const handleOpenInBrowser = () => {
@@ -47,9 +52,29 @@ const Auth = () => {
         <h1 className={cx('title')}>로그인</h1>
         <p className={cx('subtitle')}>로그인하고 레시피 분석을 시작하세요</p>
 
+        <div className={cx('buttons')}>
+          <button
+            className={cx('socialButton', 'kakaoButton')}
+            onClick={handleKakaoLogin}
+            disabled={isSigningIn}
+          >
+            카카오로 시작하기
+          </button>
+
+          {!inApp && (
+            <button
+              className={cx('socialButton', 'googleButton')}
+              onClick={handleGoogleLogin}
+              disabled={isSigningIn}
+            >
+              Google로 시작하기
+            </button>
+          )}
+        </div>
+
         {inApp && (
           <div className={cx('inAppWarning')}>
-            <p>인앱 브라우저에서는 Google 로그인이 제한됩니다.</p>
+            <p>Google 로그인은 외부 브라우저에서만 가능합니다.</p>
             <button
               className={cx('openBrowserButton')}
               onClick={handleOpenInBrowser}
@@ -66,18 +91,6 @@ const Auth = () => {
                 ? '복사한 URL을 Safari 주소창에 붙여넣어 주세요'
                 : '또는 주소창의 URL을 복사하여 Chrome에서 열어주세요'}
             </p>
-          </div>
-        )}
-
-        {!inApp && (
-          <div className={cx('buttons')}>
-            <button
-              className={cx('socialButton', 'googleButton')}
-              onClick={handleGoogleLogin}
-              disabled={isSigningIn}
-            >
-              Google로 시작하기
-            </button>
           </div>
         )}
 
