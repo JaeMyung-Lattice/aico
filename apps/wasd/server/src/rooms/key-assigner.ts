@@ -2,10 +2,10 @@ import type { Key, KeyAssignment } from '@wasd/shared'
 
 const ALL_KEYS: readonly Key[] = ['w', 'a', 's', 'd']
 
-// 대각선 조합: 각 플레이어가 수직 + 수평 키를 하나씩
+// 교차 대각선 조합: 각 플레이어가 안전 방향 최소 1개 보장
 const DIAGONAL_SPLITS: readonly [readonly Key[], readonly Key[]][] = [
   [['w', 'd'], ['a', 's']],
-  [['w', 'a'], ['s', 'd']],
+  [['a', 's'], ['w', 'd']],
 ]
 
 const shuffle = <T>(array: readonly T[]): T[] => {
@@ -50,6 +50,10 @@ export const assignKeys = (playerIds: string[]): KeyAssignment[] => {
       { playerId: playerIds[0]!, keys: [...split[0]] },
       { playerId: playerIds[1]!, keys: [...split[1]] },
     ]
+  }
+
+  if (count === 1) {
+    return [{ playerId: playerIds[0]!, keys: [...ALL_KEYS] }]
   }
 
   return []

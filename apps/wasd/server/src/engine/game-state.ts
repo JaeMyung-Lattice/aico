@@ -36,6 +36,7 @@ export const countCoins = (tileMap: TileMap): number => {
 export class ServerGameState {
   position: Position
   direction: Direction
+  moving: boolean
   deaths: number
   stage: number
   coins: number
@@ -54,6 +55,7 @@ export class ServerGameState {
     this.tileMap = tileMap
     this.position = findStartPosition(tileMap)
     this.direction = 'right'
+    this.moving = false
     this.deaths = carryDeaths
     this.stage = stage
     this.coins = 0
@@ -69,6 +71,7 @@ export class ServerGameState {
     return {
       position: { ...this.position },
       direction: this.direction,
+      moving: this.moving,
       coins: this.coins,
       totalCoins: this.totalCoins,
       deaths: this.deaths,
@@ -84,5 +87,6 @@ export class ServerGameState {
   resetPosition(): void {
     this.position = findStartPosition(this.tileMap)
     this.direction = 'right'
+    this.moving = false
   }
 }

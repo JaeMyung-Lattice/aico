@@ -60,17 +60,14 @@ export class GameLoop {
       return
     }
 
+    // 입력 처리: 방향 변경 + 이동 시작
     const inputs = [...this.state.pendingInputs]
     this.state.pendingInputs = []
 
-    if (inputs.length === 0) {
-      this.broadcast()
-      return
-    }
-
     for (const input of inputs) {
       const direction = keyToDirection(input.key)
-      const nextPosition = applyMovement(this.state.position, direction)
+      this.state.direction = direction
+      this.state.moving = true
 
       this.deathLog.record({
         tick: this.currentTick,
@@ -79,30 +76,38 @@ export class GameLoop {
         nickname: input.nickname,
         direction,
       })
+    }
 
-      if (checkWallCollision(nextPosition, this.state.tileMap) || this.obstacleManager.checkCollision(nextPosition)) {
-        this.handleDeath()
-        return
-      }
+    // 이동 중이 아니면 브로드캐스트만
+    if (!this.state.moving) {
+      this.broadcast()
+      return
+    }
 
-      this.state.position = nextPosition
-      this.state.direction = direction
+    // 현재 방향으로 자동 이동
+    const nextPosition = applyMovement(this.state.position, this.state.direction)
 
-      if (this.obstacleManager.checkCollision(this.state.position)) {
-        this.handleDeath('obstacle')
-        return
-      }
+    if (checkWallCollision(nextPosition, this.state.tileMap) || this.obstacleManager.checkCollision(nextPosition)) {
+      this.handleDeath()
+      return
+    }
 
-      const collected = checkCoinCollection(nextPosition, this.state.tileMap, this.state.collectedCoins)
-      for (const key of collected) {
-        this.state.collectedCoins.add(key)
-        this.state.coins++
-      }
+    this.state.position = nextPosition
 
-      if (this.state.coins >= this.state.totalCoins && checkGoalReached(nextPosition, this.state.tileMap)) {
-        this.handleStageClear()
-        return
-      }
+    if (this.obstacleManager.checkCollision(this.state.position)) {
+      this.handleDeath('obstacle')
+      return
+    }
+
+    const collected = checkCoinCollection(nextPosition, this.state.tileMap, this.state.collectedCoins)
+    for (const key of collected) {
+      this.state.collectedCoins.add(key)
+      this.state.coins++
+    }
+
+    if (this.state.coins >= this.state.totalCoins && checkGoalReached(nextPosition, this.state.tileMap)) {
+      this.handleStageClear()
+      return
     }
 
     this.broadcast()

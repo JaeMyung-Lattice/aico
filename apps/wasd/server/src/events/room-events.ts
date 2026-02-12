@@ -58,6 +58,39 @@ export const registerRoomEvents = (io: Server) => {
       }
     })
 
+    socket.on(SocketEvents.SOLO_START, ({ nickname }: { nickname: string }) => {
+      const trimmed = typeof nickname === 'string' ? nickname.trim() : ''
+      if (trimmed.length < 1 || trimmed.length > 10) {
+        socket.emit(SocketEvents.ERROR, { message: '닉네임은 1~10자여야 합니다.' })
+        return
+      }
+
+      const room = roomManager.createRoom(socket.id, trimmed)
+      socket.join(room.code)
+
+      const assignments = assignKeys([socket.id])
+      const updatedPlayers = room.players.map((player) => {
+        const assignment = assignments.find((a) => a.playerId === player.id)
+        return { ...player, keys: assignment?.keys ?? [] }
+      })
+
+      const updatedRoom = {
+        ...room,
+        players: updatedPlayers,
+        phase: 'playing' as GamePhase,
+      }
+      roomManager.updateRoom(room.code, updatedRoom)
+
+      socket.emit(SocketEvents.GAME_STARTED, {
+        room: updatedRoom,
+        assignments,
+      })
+
+      const gameLoop = new GameLoop(room.code, io)
+      gameLoops.set(room.code, gameLoop)
+      gameLoop.start()
+    })
+
     socket.on(SocketEvents.START_GAME, () => {
       const room = roomManager.getRoomByPlayerId(socket.id)
       if (!room) return

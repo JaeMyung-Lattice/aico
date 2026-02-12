@@ -53,6 +53,7 @@
   }
 }
 
+.soloButton,
 .createButton,
 .joinButton {
   padding: 0.75rem 1rem;
@@ -69,6 +70,15 @@
 
   &:active {
     transform: translateY(0);
+  }
+}
+
+.soloButton {
+  background: #00d4ff;
+  color: #1a1a2e;
+
+  &:hover {
+    background: #00b8d9;
   }
 }
 

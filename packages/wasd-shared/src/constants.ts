@@ -13,6 +13,6 @@ export const CANVAS_HEIGHT = MAP_ROWS * TILE_SIZE // 480
 
 export const DEATH_LOG_TICKS = 15 // 0.5 seconds
 
-export const MIN_PLAYERS = 2
+export const MIN_PLAYERS = 1
 export const MAX_PLAYERS = 4
 export const INVITE_CODE_LENGTH = 6

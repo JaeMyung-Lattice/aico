@@ -4,8 +4,8 @@ import classNames from 'classnames/bind'
 import { socket } from '@/lib/socket'
 import { useGameStore } from '@/stores/useGameStore'
 import { SocketEvents } from '@wasd/shared'
-import type { Room } from '@wasd/shared'
-import { initAudio } from '@/game/sound'
+import type { Room, KeyAssignment } from '@wasd/shared'
+import { initAudio, sound } from '@/game/sound'
 import styles from './HomePage.module.scss'
 
 const cx = classNames.bind(styles)
@@ -15,6 +15,35 @@ const HomePage = () => {
   const { nickname, setNickname } = useGameStore()
   const [inviteCode, setInviteCode] = useState('')
   const [error, setError] = useState('')
+
+  const handleSoloStart = () => {
+    initAudio()
+    if (!nickname.trim()) {
+      setError('닉네임을 입력해주세요.')
+      return
+    }
+
+    socket.off(SocketEvents.GAME_STARTED)
+    socket.off(SocketEvents.ERROR)
+    socket.emit(SocketEvents.SOLO_START, { nickname: nickname.trim() })
+
+    socket.once(SocketEvents.GAME_STARTED, ({ room, assignments }: { room: Room; assignments: KeyAssignment[] }) => {
+      socket.off(SocketEvents.ERROR)
+      const state = useGameStore.getState()
+      state.updateRoom(room)
+      const myAssignment = assignments.find((a) => a.playerId === state.myPlayerId)
+      if (myAssignment) {
+        state.setMyKeys(myAssignment.keys)
+      }
+      sound.countdownGo()
+      navigate(`/game/${room.code}`)
+    })
+
+    socket.once(SocketEvents.ERROR, ({ message }: { message: string }) => {
+      socket.off(SocketEvents.GAME_STARTED)
+      setError(message)
+    })
+  }
 
   const handleCreateRoom = () => {
     initAudio()
@@ -81,6 +110,12 @@ const HomePage = () => {
           }}
           maxLength={10}
         />
+
+        <button className={cx('soloButton')} onClick={handleSoloStart}>
+          혼자 하기
+        </button>
+
+        <div className={cx('divider')}>또는</div>
 
         <button className={cx('createButton')} onClick={handleCreateRoom}>
           방 만들기

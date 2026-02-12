@@ -26,6 +26,7 @@ export interface Position {
 export interface GameState {
   position: Position
   direction: Direction
+  moving: boolean
   coins: number
   totalCoins: number
   deaths: number

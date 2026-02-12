@@ -4,7 +4,12 @@ import { SocketEvents } from '@wasd/shared'
 import { socket } from '@/lib/socket'
 import { useGameStore } from '@/stores/useGameStore'
 
-const VALID_KEYS = new Set<string>(['w', 'a', 's', 'd'])
+const CODE_TO_KEY: Record<string, Key> = {
+  KeyW: 'w',
+  KeyA: 'a',
+  KeyS: 's',
+  KeyD: 'd',
+}
 
 export const useGameInput = () => {
   const myKeys = useGameStore((s) => s.myKeys)
@@ -16,9 +21,9 @@ export const useGameInput = () => {
     if (gamePhase !== 'playing') return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase()
-      if (!VALID_KEYS.has(key)) return
-      if (!myKeysRef.current.has(key as Key)) return
+      const key = CODE_TO_KEY[e.code]
+      if (!key) return
+      if (!myKeysRef.current.has(key)) return
 
       e.preventDefault()
       socket.emit(SocketEvents.INPUT, { key })

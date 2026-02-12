@@ -5,6 +5,7 @@ export const SocketEvents = {
   LEAVE_ROOM: 'leave-room',
   ROOM_UPDATED: 'room-updated',
   START_GAME: 'start-game',
+  SOLO_START: 'solo-start',
   GAME_STARTED: 'game-started',
   PLAYER_DISCONNECTED: 'player-disconnected',
 
