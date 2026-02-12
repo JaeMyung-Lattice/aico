@@ -1,5 +1,5 @@
-import type { Position, GameState } from '@wasd/shared'
-import { TICK_INTERVAL } from '@wasd/shared'
+import type { Position, Direction, GameState } from '@wasd/shared'
+import { TICK_INTERVAL, PLAYER_SPEED_PER_TICK } from '@wasd/shared'
 
 interface InterpolationState {
   prevPosition: Position
@@ -27,13 +27,38 @@ const lerp = (a: number, b: number, t: number): number => a + (b - a) * t
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max)
 
-export const getInterpolatedPosition = (state: InterpolationState): Position => {
-  const elapsed = performance.now() - state.lastUpdateTime
-  const t = clamp(elapsed / TICK_INTERVAL, 0, 1)
+const directionToDelta = (direction: Direction): Position => {
+  switch (direction) {
+    case 'up': return { x: 0, y: -PLAYER_SPEED_PER_TICK }
+    case 'down': return { x: 0, y: PLAYER_SPEED_PER_TICK }
+    case 'left': return { x: -PLAYER_SPEED_PER_TICK, y: 0 }
+    case 'right': return { x: PLAYER_SPEED_PER_TICK, y: 0 }
+  }
+}
 
+export const getInterpolatedPosition = (
+  state: InterpolationState,
+  direction: Direction,
+  moving: boolean,
+): Position => {
+  const elapsed = performance.now() - state.lastUpdateTime
+  const t = elapsed / TICK_INTERVAL
+
+  if (t <= 1) {
+    return {
+      x: lerp(state.prevPosition.x, state.currentPosition.x, clamp(t, 0, 1)),
+      y: lerp(state.prevPosition.y, state.currentPosition.y, clamp(t, 0, 1)),
+    }
+  }
+
+  // 외삽: 서버 응답 대기 중 현재 방향으로 예측 이동
+  if (!moving) return state.currentPosition
+
+  const extraTicks = clamp(t - 1, 0, 2)
+  const delta = directionToDelta(direction)
   return {
-    x: lerp(state.prevPosition.x, state.currentPosition.x, t),
-    y: lerp(state.prevPosition.y, state.currentPosition.y, t),
+    x: state.currentPosition.x + delta.x * extraTicks,
+    y: state.currentPosition.y + delta.y * extraTicks,
   }
 }
 

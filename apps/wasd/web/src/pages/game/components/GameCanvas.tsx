@@ -34,8 +34,9 @@ const GameCanvas = ({ gameState, tileMap }: GameCanvasProps) => {
   }, [gameState, tileMap])
 
   const canvasRef = useCanvas((ctx) => {
-    const renderPosition = getInterpolatedPosition(interpRef.current)
-    renderFrame(ctx, tileMapRef.current, gameStateRef.current, renderPosition, collectedSetRef.current)
+    const state = gameStateRef.current
+    const renderPosition = getInterpolatedPosition(interpRef.current, state.direction, state.moving)
+    renderFrame(ctx, tileMapRef.current, state, renderPosition, collectedSetRef.current)
   })
 
   return <canvas ref={canvasRef} style={{ display: 'block', imageRendering: 'pixelated' }} />
