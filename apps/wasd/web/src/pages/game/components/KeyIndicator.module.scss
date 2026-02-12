@@ -1,0 +1,34 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 4px;
+}
+
+.key {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  background: #1a1a2e;
+  color: #4a4a6a;
+  border: 2px solid #2a2a4a;
+  user-select: none;
+
+  &.active {
+    background: #0f3460;
+    color: #00d4ff;
+    border-color: #00d4ff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+  }
+}

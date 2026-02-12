@@ -1,0 +1,53 @@
+.timeline {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 480px;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  background: #1a1a2e;
+  border-radius: 4px;
+  border: 1px solid #2a2a4a;
+  min-width: 48px;
+
+  &.culprit {
+    background: #3d1a1a;
+    border-color: #e94560;
+    box-shadow: 0 0 8px rgba(233, 69, 96, 0.4);
+  }
+}
+
+.arrow {
+  font-size: 16px;
+  color: #8892b0;
+
+  .culprit & {
+    color: #e94560;
+  }
+}
+
+.key {
+  font-size: 12px;
+  font-weight: 700;
+  color: #00d4ff;
+
+  .culprit & {
+    color: #e94560;
+  }
+}
+
+.name {
+  font-size: 10px;
+  color: #5a6080;
+  max-width: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

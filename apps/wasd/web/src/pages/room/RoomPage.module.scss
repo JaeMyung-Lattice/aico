@@ -1,0 +1,93 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: #1a1a2e;
+  color: #eee;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 2rem;
+}
+
+.startButton {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #e94560;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #c73a52;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.leaveButton {
+  padding: 0.75rem 1rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: transparent;
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #666;
+    color: #eee;
+  }
+}
+
+.countdownOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.countdownNumber {
+  font-size: 120px;
+  font-weight: 900;
+  color: #00d4ff;
+  text-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+  animation: countdownPulse 1s ease-in-out;
+}
+
+@keyframes countdownPulse {
+  0% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+}
