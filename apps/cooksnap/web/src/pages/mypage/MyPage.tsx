@@ -6,6 +6,7 @@ import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Loading } from '@repo/ui'
+import useRedirectUrl from '@/hooks/useRedirectUrl'
 import PremiumModal from '@/components/PremiumModal'
 import type { SavedRecipe, AnalysisHistoryItem, SubscriptionInfo } from '@/types/user'
 import styles from './MyPage.module.scss'
@@ -15,6 +16,7 @@ const cx = classnames.bind(styles)
 type Tab = 'saved' | 'history'
 
 const MyPage = () => {
+  const { isAuthenticated, isLoading: authLoading } = useRedirectUrl()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user, initialize } = useAuthStore()
@@ -72,6 +74,10 @@ const MyPage = () => {
       month: 'long',
       day: 'numeric',
     })
+  }
+
+  if (authLoading || !isAuthenticated) {
+    return <Loading fullPage />
   }
 
   return (

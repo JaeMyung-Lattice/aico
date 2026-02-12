@@ -20,17 +20,22 @@ export class RecipesController {
   }
 
   @Get(':id')
-  findById(@Param('id') id: string) {
-    return this.recipesService.findById(id);
+  @UseGuards(AuthGuard)
+  findById(@Param('id') id: string, @Req() req: any) {
+    return this.recipesService.findById(id, req.user.id);
   }
 
   @Get(':id/prices')
-  getPrices(@Param('id') id: string) {
+  @UseGuards(AuthGuard)
+  async getPrices(@Param('id') id: string, @Req() req: any) {
+    await this.recipesService.checkOwnership(id, req.user.id);
     return this.kamisService.getRecipePrices(id);
   }
 
   @Get(':id/purchase-links')
-  getPurchaseLinks(@Param('id') id: string) {
+  @UseGuards(AuthGuard)
+  async getPurchaseLinks(@Param('id') id: string, @Req() req: any) {
+    await this.recipesService.checkOwnership(id, req.user.id);
     return this.coupangService.getPurchaseLinks(id);
   }
 }

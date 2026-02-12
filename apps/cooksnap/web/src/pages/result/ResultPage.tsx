@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
@@ -6,6 +6,7 @@ import classnames from 'classnames/bind'
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Loading } from '@repo/ui'
+import useRedirectUrl from '@/hooks/useRedirectUrl'
 import PremiumModal from '@/components/PremiumModal'
 import type { Recipe, PurchaseLink } from '@/types/recipe'
 import styles from './ResultPage.module.scss'
@@ -18,6 +19,7 @@ const formatPrice = (price: number | null): string => {
 }
 
 const Result = () => {
+  const { isAuthenticated, isLoading: authLoading } = useRedirectUrl()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -30,8 +32,16 @@ const Result = () => {
       const { data } = await api.get(`/recipes/${id}`)
       return data
     },
-    enabled: !!id,
+    enabled: !!id && isAuthenticated,
   })
+
+  // 403 (소유권 없음) 시 메인으로 이동
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (error && (error as any)?.response?.status === 403) {
+      navigate('/', { replace: true })
+    }
+  }, [error, navigate])
 
   // 저장 여부 확인 (프리미엄 로그인 사용자만)
   const { data: saveStatus } = useQuery<{ saved: boolean }>({
@@ -89,7 +99,7 @@ const Result = () => {
     return link?.purchaseUrl || null
   }
 
-  if (isLoading) {
+  if (authLoading || !isAuthenticated || isLoading) {
     return <Loading message="레시피를 불러오는 중..." />
   }
 

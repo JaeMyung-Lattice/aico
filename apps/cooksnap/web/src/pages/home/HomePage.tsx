@@ -23,10 +23,10 @@ const validateVideoUrl = (url: string): boolean => {
 }
 
 const LOADING_STEPS = [
-  '영상을 다운로드하고 있어요',
-  'AI가 영상을 분석하고 있어요',
-  '레시피를 추출하고 있어요',
-  '재료 정보를 정리하고 있어요',
+  'AI 셰프가 영상을 감상하고 있어요',
+  '레시피의 비밀을 파헤치는 중이에요',
+  '재료와 양념을 꼼꼼히 메모하고 있어요',
+  '거의 다 됐어요! 맛있는 레시피가 곧 완성돼요',
 ]
 
 const Landing = () => {
@@ -38,6 +38,7 @@ const Landing = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [completionId, setCompletionId] = useState<string | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // 로그인 후 복귀 시 저장된 URL 복원
@@ -94,7 +95,8 @@ const Landing = () => {
       const { data } = await api.post<AnalyzeResponse>('/recipes/analyze', { url: url.trim() })
       await fetchQuota()
       queryClient.invalidateQueries({ queryKey: ['my-history'] })
-      navigate(`/result/${data.id}`)
+      setIsLoading(false)
+      setCompletionId(data.id)
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const status = (err as any)?.response?.status
@@ -114,6 +116,24 @@ const Landing = () => {
     if (e.key === 'Enter' && !isLoading) {
       handleAnalyze()
     }
+  }
+
+  if (completionId) {
+    return (
+      <div className={cx('landing')}>
+        <div className={cx('loadingOverlay', 'completion')}>
+          <video
+            className={cx('completionVideo')}
+            src="/loading.mp4"
+            autoPlay
+            muted
+            playsInline
+            onEnded={() => navigate(`/result/${completionId}`)}
+          />
+          <p className={cx('loadingMessage')}>레시피가 완성되었어요!</p>
+        </div>
+      </div>
+    )
   }
 
   if (isLoading) {

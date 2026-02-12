@@ -106,8 +106,19 @@ export class RecipesService {
     }
   };
 
+  // 소유권 확인 (AnalysisHistory에 기록이 있는지, 없으면 403)
+  checkOwnership = async (recipeId: string, userId: string): Promise<void> => {
+    const history = await this.prisma.analysisHistory.findFirst({
+      where: { recipeId, userId },
+      select: { id: true },
+    });
+    if (!history) {
+      throw new ForbiddenException('접근 권한이 없습니다.');
+    }
+  };
+
   // 레시피 상세 조회
-  findById = async (id: string) => {
+  findById = async (id: string, userId: string) => {
     const recipe = await this.prisma.recipe.findUnique({
       where: { id },
       include: {
@@ -119,6 +130,8 @@ export class RecipesService {
     if (!recipe) {
       throw new NotFoundException('레시피를 찾을 수 없습니다.');
     }
+
+    await this.checkOwnership(id, userId);
 
     return recipe;
   };
