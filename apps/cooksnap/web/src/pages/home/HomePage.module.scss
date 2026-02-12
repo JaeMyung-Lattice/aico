@@ -110,16 +110,6 @@
   min-height: calc(100vh - 56px - $spacing-xxl * 2);
   gap: $spacing-lg;
 
-  &.completion {
-    animation: fadeIn 0.5s ease;
-  }
-}
-
-.completionVideo {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 50%;
 }
 
 .spinner {
