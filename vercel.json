@@ -1,6 +1,4 @@
 {
-  "buildCommand": "pnpm --filter @cooksnap/web run build",
-  "outputDirectory": "apps/cooksnap/web/dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]
