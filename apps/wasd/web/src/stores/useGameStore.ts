@@ -6,7 +6,7 @@ interface GameResult {
   elapsedTime: number
 }
 
-const PREDICTION_GUARD_MS = 500
+const PREDICTION_GUARD_MS = 150
 
 interface GameStore {
   roomCode: string | null
@@ -81,26 +81,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   applyServerState: (state) => {
     const { predictionTime, gameState: current } = get()
-    const isPredictionActive = predictionTime > 0 && Date.now() - predictionTime < PREDICTION_GUARD_MS
+    const isPredictionActive = Date.now() - predictionTime < PREDICTION_GUARD_MS
 
     if (isPredictionActive && current) {
-      // 사망/스테이지 전환 → 예측 즉시 해제, 서버 상태 수용
-      if (state.deaths !== current.deaths || state.stage !== current.stage) {
-        set({ gameState: state, gamePhase: state.phase, predictionTime: 0 })
-        return
-      }
-      // 서버가 예측 방향을 확인 → 가드 해제, 서버 상태 수용
-      if (state.direction === current.direction && state.moving === current.moving) {
-        set({ gameState: state, gamePhase: state.phase, predictionTime: 0 })
-        return
-      }
-      // 서버가 아직 입력을 처리하지 않음 → 예측 방향 유지
       set({
         gameState: { ...state, direction: current.direction, moving: current.moving },
         gamePhase: state.phase,
       })
     } else {
-      set({ gameState: state, gamePhase: state.phase, predictionTime: 0 })
+      set({ gameState: state, gamePhase: state.phase })
     }
   },
 

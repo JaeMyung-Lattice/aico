@@ -31,12 +31,7 @@ const GameCanvas = ({ gameState, tileMap }: GameCanvasProps) => {
     if (shouldResetInterpolation(prevStateRef.current, gameState)) {
       interpRef.current = createInterpolationState(gameState.position)
     } else {
-      // position이 실제 변경된 경우에만 보간 상태 리셋
-      // 변경 없으면 lastUpdateTime 유지 → 외삽(extrapolation) 정상 작동
-      const cur = interpRef.current.currentPosition
-      if (cur.x !== gameState.position.x || cur.y !== gameState.position.y) {
-        interpRef.current = updateInterpolationState(interpRef.current, gameState.position)
-      }
+      interpRef.current = updateInterpolationState(interpRef.current, gameState.position)
     }
     prevStateRef.current = gameState
     collectedSetRef.current = new Set(gameState.collectedCoins)
