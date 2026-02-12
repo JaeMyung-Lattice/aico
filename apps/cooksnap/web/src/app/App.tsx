@@ -15,14 +15,19 @@ const queryClient = new QueryClient({
   },
 })
 
+const isPrerendering = typeof navigator !== 'undefined'
+  && navigator.userAgent.includes('HeadlessChrome')
+
 const App = () => {
   const { initialize, isLoading } = useAuthStore()
 
   useEffect(() => {
-    initialize()
+    if (!isPrerendering) {
+      initialize()
+    }
   }, [initialize])
 
-  if (isLoading) {
+  if (isLoading && !isPrerendering) {
     return <Loading fullPage />
   }
 

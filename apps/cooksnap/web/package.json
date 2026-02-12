@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite --port 5173",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && tsx scripts/prerender.ts",
     "preview": "vite preview",
     "lint": "eslint --max-warnings 0",
     "check-types": "tsc --noEmit"
@@ -30,7 +30,10 @@
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^4.5.2",
     "eslint": "^9.39.1",
+    "puppeteer": "^24.37.2",
     "sass": "^1.89.1",
+    "serve": "^14.2.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2",
     "vite": "^6.3.5"
   }
