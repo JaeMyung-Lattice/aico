@@ -35,14 +35,7 @@ export const useGameInput = () => {
       e.preventDefault()
 
       // 클라이언트 예측: 즉시 방향 + 이동 상태 반영
-      const state = useGameStore.getState()
-      if (state.gameState) {
-        state.setGameState({
-          ...state.gameState,
-          direction: KEY_TO_DIRECTION[key],
-          moving: true,
-        })
-      }
+      useGameStore.getState().applyPrediction(KEY_TO_DIRECTION[key])
 
       socket.emit(SocketEvents.INPUT, { key })
     }

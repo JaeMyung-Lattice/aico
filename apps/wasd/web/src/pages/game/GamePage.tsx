@@ -43,7 +43,7 @@ const GamePage = () => {
         sound.coin()
       }
       prevCoinsRef.current = state.coins
-      useGameStore.getState().setGameState(state)
+      useGameStore.getState().applyServerState(state)
     }
 
     const handleDeath = (event: DeathEvent) => {

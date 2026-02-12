@@ -1,10 +1,12 @@
 import { create } from 'zustand'
-import type { Room, Player, Key, GamePhase, GameState, DeathEvent } from '@wasd/shared'
+import type { Room, Player, Key, GamePhase, GameState, DeathEvent, Direction } from '@wasd/shared'
 
 interface GameResult {
   deaths: number
   elapsedTime: number
 }
+
+const PREDICTION_GUARD_MS = 150
 
 interface GameStore {
   roomCode: string | null
@@ -17,6 +19,7 @@ interface GameStore {
   gameState: GameState | null
   deathEvent: DeathEvent | null
   gameResult: GameResult | null
+  predictionTime: number
 
   setNickname: (nickname: string) => void
   setMyPlayerId: (id: string) => void
@@ -24,6 +27,8 @@ interface GameStore {
   setMyKeys: (keys: Key[]) => void
   setGamePhase: (phase: GamePhase) => void
   setGameState: (state: GameState) => void
+  applyPrediction: (direction: Direction) => void
+  applyServerState: (state: GameState) => void
   setDeathEvent: (event: DeathEvent | null) => void
   setGameResult: (result: GameResult) => void
   reset: () => void
@@ -40,6 +45,7 @@ const initialState = {
   gameState: null as GameState | null,
   deathEvent: null as DeathEvent | null,
   gameResult: null as GameResult | null,
+  predictionTime: 0,
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -66,6 +72,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setGamePhase: (phase) => set({ gamePhase: phase }),
 
   setGameState: (state) => set({ gameState: state, gamePhase: state.phase }),
+
+  applyPrediction: (direction) => {
+    const { gameState } = get()
+    if (!gameState) return
+    set({
+      gameState: { ...gameState, direction, moving: true },
+      predictionTime: Date.now(),
+    })
+  },
+
+  applyServerState: (state) => {
+    const { predictionTime, gameState: current } = get()
+    const isPredictionActive = Date.now() - predictionTime < PREDICTION_GUARD_MS
+
+    if (isPredictionActive && current) {
+      set({
+        gameState: { ...state, direction: current.direction, moving: current.moving },
+        gamePhase: state.phase,
+      })
+    } else {
+      set({ gameState: state, gamePhase: state.phase })
+    }
+  },
 
   setDeathEvent: (event) => set({ deathEvent: event }),
 
