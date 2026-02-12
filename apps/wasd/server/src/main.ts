@@ -6,18 +6,20 @@ import { registerRoomEvents } from './events/room-events.js'
 import { registerGameEvents } from './events/game-events.js'
 
 const CLIENT_ORIGIN = process.env['CLIENT_ORIGIN'] ?? 'http://localhost:5174'
+const corsOrigins = CLIENT_ORIGIN.split(',').map((o) => o.trim())
 
 const app = express()
 const httpServer = createServer(app)
 
 const io = new Server(httpServer, {
   cors: {
-    origin: CLIENT_ORIGIN,
+    origin: corsOrigins,
     methods: ['GET', 'POST'],
   },
+  transports: ['websocket', 'polling'],
 })
 
-app.use(cors({ origin: CLIENT_ORIGIN }))
+app.use(cors({ origin: corsOrigins }))
 app.use(express.json())
 
 app.get('/health', (_req, res) => {
