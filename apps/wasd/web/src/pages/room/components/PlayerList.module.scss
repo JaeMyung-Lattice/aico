@@ -1,0 +1,39 @@
+.playerList {
+  width: 100%;
+  max-width: 320px;
+}
+
+.heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 0.75rem;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #16213e;
+  border-radius: 8px;
+}
+
+.nickname {
+  font-weight: 600;
+}
+
+.hostBadge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  background: #e94560;
+  border-radius: 4px;
+  color: #fff;
+}
