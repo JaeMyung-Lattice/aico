@@ -6,7 +6,7 @@ interface GameResult {
   elapsedTime: number
 }
 
-const PREDICTION_GUARD_MS = 150
+const PREDICTION_GUARD_MS = 500
 
 interface GameStore {
   roomCode: string | null
