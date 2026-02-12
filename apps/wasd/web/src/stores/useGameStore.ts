@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Room, Player, Key, GamePhase, GameState, DeathEvent, Direction } from '@wasd/shared'
+import type { Room, Player, Key, GamePhase, GameState, Direction } from '@wasd/shared'
 
 interface GameResult {
   deaths: number
@@ -17,7 +17,6 @@ interface GameStore {
   gamePhase: GamePhase
   nickname: string
   gameState: GameState | null
-  deathEvent: DeathEvent | null
   gameResult: GameResult | null
   predictionTime: number
 
@@ -29,7 +28,6 @@ interface GameStore {
   setGameState: (state: GameState) => void
   applyPrediction: (direction: Direction) => void
   applyServerState: (state: GameState) => void
-  setDeathEvent: (event: DeathEvent | null) => void
   setGameResult: (result: GameResult) => void
   reset: () => void
 }
@@ -43,7 +41,6 @@ const initialState = {
   gamePhase: 'lobby' as GamePhase,
   nickname: '',
   gameState: null as GameState | null,
-  deathEvent: null as DeathEvent | null,
   gameResult: null as GameResult | null,
   predictionTime: 0,
 }
@@ -95,8 +92,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ gameState: state, gamePhase: state.phase })
     }
   },
-
-  setDeathEvent: (event) => set({ deathEvent: event }),
 
   setGameResult: (result) => set({ gameResult: result, gamePhase: 'complete' }),
 

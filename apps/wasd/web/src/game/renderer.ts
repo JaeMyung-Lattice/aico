@@ -112,12 +112,16 @@ const renderPlayer = (
   ctx.fill()
 }
 
+const isLargeObstacle = (obs: Obstacle): boolean =>
+  obs.size.width > 16 || obs.size.height > 16
+
 const renderObstacles = (ctx: CanvasRenderingContext2D, obstacles: Obstacle[]) => {
   for (const obs of obstacles) {
-    ctx.fillStyle = COLORS.obstacle
+    const large = isLargeObstacle(obs)
+    ctx.fillStyle = large ? '#b44dff' : COLORS.obstacle
     ctx.fillRect(obs.position.x, obs.position.y, obs.size.width, obs.size.height)
-    ctx.strokeStyle = COLORS.obstacleOutline
-    ctx.lineWidth = 1
+    ctx.strokeStyle = large ? '#8a2be2' : COLORS.obstacleOutline
+    ctx.lineWidth = large ? 2 : 1
     ctx.strokeRect(obs.position.x + 0.5, obs.position.y + 0.5, obs.size.width - 1, obs.size.height - 1)
   }
 }

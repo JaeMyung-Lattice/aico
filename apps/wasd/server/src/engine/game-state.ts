@@ -88,5 +88,7 @@ export class ServerGameState {
     this.position = findStartPosition(this.tileMap)
     this.direction = 'right'
     this.moving = false
+    this.coins = 0
+    this.collectedCoins.clear()
   }
 }

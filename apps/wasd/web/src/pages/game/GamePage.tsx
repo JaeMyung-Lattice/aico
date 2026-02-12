@@ -1,7 +1,7 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import classNames from 'classnames/bind'
-import type { GameState, DeathEvent } from '@wasd/shared'
+import type { GameState } from '@wasd/shared'
 import { SocketEvents, STAGES } from '@wasd/shared'
 import { socket } from '@/lib/socket'
 import { useGameStore } from '@/stores/useGameStore'
@@ -10,7 +10,6 @@ import { sound } from '@/game/sound'
 import GameCanvas from './components/GameCanvas'
 import GameHUD from './components/GameHUD'
 import KeyIndicator from './components/KeyIndicator'
-import DeathLog from './components/DeathLog'
 import StageTransition from './components/StageTransition'
 import styles from './GamePage.module.scss'
 
@@ -22,12 +21,7 @@ const GamePage = () => {
   const myKeys = useGameStore((s) => s.myKeys)
   const gameState = useGameStore((s) => s.gameState)
   const gamePhase = useGameStore((s) => s.gamePhase)
-  const deathEvent = useGameStore((s) => s.deathEvent)
   const prevCoinsRef = useRef(0)
-
-  const handleDismissDeathLog = useCallback(() => {
-    useGameStore.getState().setDeathEvent(null)
-  }, [])
 
   useGameInput()
 
@@ -46,9 +40,8 @@ const GamePage = () => {
       useGameStore.getState().applyServerState(state)
     }
 
-    const handleDeath = (event: DeathEvent) => {
+    const handleDeath = () => {
       sound.death()
-      useGameStore.getState().setDeathEvent(event)
     }
 
     const handleStageClear = () => {
@@ -98,10 +91,6 @@ const GamePage = () => {
         <GameCanvas gameState={gameState} tileMap={tileMap} />
       </div>
       <KeyIndicator myKeys={myKeys} />
-
-      {deathEvent && (
-        <DeathLog deathEvent={deathEvent} onDismiss={handleDismissDeathLog} />
-      )}
 
       {gamePhase === 'stage-clear' && <StageTransition stage={gameState.stage} />}
     </div>
