@@ -1,5 +1,5 @@
 import type { TileMap, Position, Direction, GameState, Obstacle } from '@wasd/shared'
-import { TileType, TILE_SIZE, PLAYER_SIZE, CANVAS_WIDTH, CANVAS_HEIGHT } from '@wasd/shared'
+import { TileType, TILE_SIZE, PLAYER_SIZE } from '@wasd/shared'
 
 const COLORS = {
   bg: '#0f0f23',
@@ -133,8 +133,10 @@ export const renderFrame = (
   renderPosition: Position,
   collectedSet: Set<string>,
 ) => {
+  const rows = tileMap.length
+  const cols = tileMap[0]?.length ?? 0
   ctx.fillStyle = COLORS.bg
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+  ctx.fillRect(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
 
   renderTileMap(ctx, tileMap, collectedSet)
   renderObstacles(ctx, gameState.obstacles)

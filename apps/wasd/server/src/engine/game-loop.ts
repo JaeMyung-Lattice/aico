@@ -33,9 +33,12 @@ export class GameLoop {
   constructor(roomCode: string, io: Server) {
     this.roomCode = roomCode;
     this.io = io;
-    this.state = new ServerGameState(5);
+    const startStage = 1;
+    this.state = new ServerGameState(startStage);
     this.deathLog = new DeathLogManager();
-    this.obstacleManager = new ObstacleManager(STAGE_OBSTACLES[0] ?? []);
+    this.obstacleManager = new ObstacleManager(
+      STAGE_OBSTACLES[startStage - 1] ?? []
+    );
   }
 
   start(): void {

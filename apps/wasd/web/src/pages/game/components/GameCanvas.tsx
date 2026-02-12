@@ -1,5 +1,6 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useMemo } from 'react'
 import type { GameState, TileMap } from '@wasd/shared'
+import { TILE_SIZE } from '@wasd/shared'
 import { useCanvas } from '@/hooks/useCanvas'
 import { renderFrame } from '@/game/renderer'
 import {
@@ -21,6 +22,11 @@ const GameCanvas = ({ gameState, tileMap }: GameCanvasProps) => {
   const gameStateRef = useRef(gameState)
   const tileMapRef = useRef(tileMap)
 
+  const { canvasWidth, canvasHeight } = useMemo(() => ({
+    canvasWidth: (tileMap[0]?.length ?? 0) * TILE_SIZE,
+    canvasHeight: tileMap.length * TILE_SIZE,
+  }), [tileMap])
+
   useEffect(() => {
     if (shouldResetInterpolation(prevStateRef.current, gameState)) {
       interpRef.current = createInterpolationState(gameState.position)
@@ -37,7 +43,7 @@ const GameCanvas = ({ gameState, tileMap }: GameCanvasProps) => {
     const state = gameStateRef.current
     const renderPosition = getInterpolatedPosition(interpRef.current, state.direction, state.moving)
     renderFrame(ctx, tileMapRef.current, state, renderPosition, collectedSetRef.current)
-  })
+  }, canvasWidth, canvasHeight)
 
   return <canvas ref={canvasRef} style={{ display: 'block', imageRendering: 'pixelated' }} />
 }

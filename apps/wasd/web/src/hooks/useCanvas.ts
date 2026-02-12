@@ -1,7 +1,10 @@
 import { useRef, useEffect } from 'react'
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from '@wasd/shared'
 
-export const useCanvas = (draw: (ctx: CanvasRenderingContext2D) => void) => {
+export const useCanvas = (
+  draw: (ctx: CanvasRenderingContext2D) => void,
+  width: number,
+  height: number,
+) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawRef = useRef(draw)
   drawRef.current = draw
@@ -11,8 +14,8 @@ export const useCanvas = (draw: (ctx: CanvasRenderingContext2D) => void) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    canvas.width = CANVAS_WIDTH
-    canvas.height = CANVAS_HEIGHT
+    canvas.width = width
+    canvas.height = height
     ctxRef.current = canvas.getContext('2d')
 
     let animationId: number
@@ -24,7 +27,7 @@ export const useCanvas = (draw: (ctx: CanvasRenderingContext2D) => void) => {
     animationId = requestAnimationFrame(render)
 
     return () => cancelAnimationFrame(animationId)
-  }, [])
+  }, [width, height])
 
   return canvasRef
 }
