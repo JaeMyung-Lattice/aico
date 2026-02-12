@@ -150,4 +150,85 @@ export class PaymentService {
       currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
     };
   };
+
+  handleWebhook = async (body: string, headers: Record<string, string>) => {
+    // 1. 서명 검증
+    const webhook = await this.portoneService.verifyWebhook(body, headers);
+
+    // 2. 결제 완료 처리
+    if (webhook.type === 'Transaction.Paid') {
+      await this.handlePaymentPaid(webhook.data.paymentId);
+    }
+
+    // 3. 결제 실패 처리
+    if (webhook.type === 'Transaction.Failed') {
+      await this.handlePaymentFailed(webhook.data.paymentId);
+    }
+
+    return { received: true };
+  };
+
+  private handlePaymentPaid = async (portonePaymentId: string) => {
+    const payment = await this.prisma.payment.findFirst({
+      where: { portonePaymentId },
+      include: { subscription: true },
+    });
+
+    if (!payment) {
+      this.logger.warn(`결제 기록을 찾을 수 없습니다: ${portonePaymentId}`);
+      return;
+    }
+
+    // 멱등성: 이미 PAID면 스킵
+    if (payment.status === 'PAID') {
+      this.logger.log(`이미 처리된 결제: ${portonePaymentId}`);
+      return;
+    }
+
+    // 포트원 API로 이중 검증
+    const portonePayment = await this.portoneService.getPayment(portonePaymentId);
+    if (portonePayment.status !== 'PAID') {
+      this.logger.warn(`포트원 결제 상태 불일치: ${portonePayment.status}`);
+      return;
+    }
+
+    const periodEnd = payment.subscription?.currentPeriodEnd ?? new Date();
+
+    await this.prisma.$transaction([
+      this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'PAID', paidAt: new Date() },
+      }),
+      this.prisma.user.update({
+        where: { id: payment.userId },
+        data: { isPremium: true, premiumExpiresAt: periodEnd },
+      }),
+    ]);
+
+    this.logger.log(`결제 확인 완료: ${portonePaymentId}`);
+  };
+
+  private handlePaymentFailed = async (portonePaymentId: string) => {
+    const payment = await this.prisma.payment.findFirst({
+      where: { portonePaymentId },
+    });
+
+    if (!payment) {
+      this.logger.warn(`결제 기록을 찾을 수 없습니다: ${portonePaymentId}`);
+      return;
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'FAILED', failReason: 'Webhook 결제 실패 알림' },
+      }),
+      this.prisma.subscription.updateMany({
+        where: { id: payment.subscriptionId ?? undefined },
+        data: { status: 'EXPIRED' },
+      }),
+    ]);
+
+    this.logger.log(`결제 실패 처리 완료: ${portonePaymentId}`);
+  };
 }

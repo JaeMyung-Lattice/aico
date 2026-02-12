@@ -1,12 +1,15 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 
 const bootstrap = async () => {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const configService = app.get(ConfigService);
 
+  app.use(helmet());
   app.setGlobalPrefix('api/v1');
 
   app.useGlobalPipes(
@@ -16,6 +19,7 @@ const bootstrap = async () => {
       transform: true,
     }),
   );
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   const corsOrigins = configService.get<string>('CORS_ORIGINS', 'http://localhost:5173');
   app.enableCors({
@@ -25,7 +29,7 @@ const bootstrap = async () => {
 
   const port = configService.get<number>('PORT', 4000);
   await app.listen(port);
-  console.log(`CookSnap API running on http://localhost:${port}`);
+  Logger.log(`CookSnap API running on http://localhost:${port}`, 'Bootstrap');
 };
 
 bootstrap();
