@@ -16,3 +16,9 @@
   border: 2px solid #0f3460;
   line-height: 0;
 }
+
+@media (pointer: coarse) {
+  .container {
+    padding-bottom: 160px;
+  }
+}

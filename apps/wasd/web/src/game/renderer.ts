@@ -132,13 +132,15 @@ export const renderFrame = (
   gameState: GameState,
   renderPosition: Position,
   collectedSet: Set<string>,
+  cameraOffset: Position = { x: 0, y: 0 },
 ) => {
-  const rows = tileMap.length
-  const cols = tileMap[0]?.length ?? 0
   ctx.fillStyle = COLORS.bg
-  ctx.fillRect(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
+  ctx.save()
+  ctx.translate(-cameraOffset.x, -cameraOffset.y)
   renderTileMap(ctx, tileMap, collectedSet)
   renderObstacles(ctx, gameState.obstacles)
   renderPlayer(ctx, renderPosition, gameState.direction)
+  ctx.restore()
 }

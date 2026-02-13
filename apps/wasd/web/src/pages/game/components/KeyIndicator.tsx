@@ -4,6 +4,8 @@ import styles from './KeyIndicator.module.scss'
 
 const cx = classNames.bind(styles)
 
+const ALL_KEYS: Key[] = ['w', 'a', 's', 'd']
+
 interface KeyIndicatorProps {
   myKeys: Key[]
 }
@@ -11,17 +13,29 @@ interface KeyIndicatorProps {
 const KeyIndicator = ({ myKeys }: KeyIndicatorProps) => {
   const myKeysSet = new Set(myKeys)
 
+  const renderKey = (key: Key) => {
+    const isActive = myKeysSet.has(key)
+    return (
+      <div
+        key={key}
+        data-key={isActive ? key : undefined}
+        className={cx('key', {
+          active: isActive,
+          disabled: !isActive,
+        })}
+      >
+        {key.toUpperCase()}
+      </div>
+    )
+  }
+
   return (
     <div className={cx('container')}>
       <div className={cx('row')}>
-        <div className={cx('key', { active: myKeysSet.has('w') })}>W</div>
+        {renderKey('w')}
       </div>
       <div className={cx('row')}>
-        {(['a', 's', 'd'] as Key[]).map((key) => (
-          <div key={key} className={cx('key', { active: myKeysSet.has(key) })}>
-            {key.toUpperCase()}
-          </div>
-        ))}
+        {ALL_KEYS.filter((k) => k !== 'w').map(renderKey)}
       </div>
     </div>
   )

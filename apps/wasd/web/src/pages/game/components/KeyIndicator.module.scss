@@ -24,11 +24,47 @@
   color: #4a4a6a;
   border: 2px solid #2a2a4a;
   user-select: none;
+  touch-action: manipulation;
 
   &.active {
     background: #0f3460;
     color: #00d4ff;
     border-color: #00d4ff;
     box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+  }
+
+  &.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  &.active:active {
+    background: #1a5090;
+    transform: scale(0.92);
+  }
+}
+
+@media (pointer: coarse) {
+  .container {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background: rgba(10, 10, 26, 0.7);
+    border-radius: 12px;
+    padding: 12px;
+    gap: 6px;
+  }
+
+  .row {
+    gap: 6px;
+  }
+
+  .key {
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+    border-radius: 10px;
   }
 }

@@ -27,20 +27,35 @@ export const useGameInput = () => {
   useEffect(() => {
     if (gamePhase !== 'playing') return
 
+    const emitKey = (key: Key) => {
+      useGameStore.getState().applyPrediction(KEY_TO_DIRECTION[key])
+      socket.emit(SocketEvents.INPUT, { key })
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = CODE_TO_KEY[e.code]
       if (!key) return
       if (!myKeysRef.current.has(key)) return
 
       e.preventDefault()
+      emitKey(key)
+    }
 
-      // 클라이언트 예측: 즉시 방향 + 이동 상태 반영
-      useGameStore.getState().applyPrediction(KEY_TO_DIRECTION[key])
+    const handleTouchStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement
+      const key = target.dataset.key as Key | undefined
+      if (!key) return
+      if (!myKeysRef.current.has(key)) return
 
-      socket.emit(SocketEvents.INPUT, { key })
+      e.preventDefault()
+      emitKey(key)
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('touchstart', handleTouchStart, { passive: false })
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('touchstart', handleTouchStart)
+    }
   }, [gamePhase])
 }

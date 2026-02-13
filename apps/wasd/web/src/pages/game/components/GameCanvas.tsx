@@ -1,5 +1,5 @@
-import { useRef, useEffect, useMemo } from 'react'
-import type { GameState, TileMap } from '@wasd/shared'
+import { useRef, useState, useEffect, useMemo } from 'react'
+import type { GameState, TileMap, Position } from '@wasd/shared'
 import { TILE_SIZE } from '@wasd/shared'
 import { useCanvas } from '@/hooks/useCanvas'
 import { renderFrame } from '@/game/renderer'
@@ -9,6 +9,24 @@ import {
   getInterpolatedPosition,
   shouldResetInterpolation,
 } from '@/game/interpolation'
+
+const TOUCH_UI_HEIGHT = 160
+
+const isTouchDevice = 'ontouchstart' in globalThis
+
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(Math.max(v, min), max)
+
+const calcCameraOffset = (
+  playerPos: Position,
+  viewportW: number,
+  viewportH: number,
+  mapW: number,
+  mapH: number,
+): Position => ({
+  x: clamp(playerPos.x - viewportW / 2, 0, Math.max(0, mapW - viewportW)),
+  y: clamp(playerPos.y - viewportH / 2, 0, Math.max(0, mapH - viewportH)),
+})
 
 interface GameCanvasProps {
   gameState: GameState
@@ -22,10 +40,26 @@ const GameCanvas = ({ gameState, tileMap }: GameCanvasProps) => {
   const gameStateRef = useRef(gameState)
   const tileMapRef = useRef(tileMap)
 
-  const { canvasWidth, canvasHeight } = useMemo(() => ({
-    canvasWidth: (tileMap[0]?.length ?? 0) * TILE_SIZE,
-    canvasHeight: tileMap.length * TILE_SIZE,
-  }), [tileMap])
+  const mapWidth = (tileMap[0]?.length ?? 0) * TILE_SIZE
+  const mapHeight = tileMap.length * TILE_SIZE
+
+  const [viewport, setViewport] = useState({ w: window.innerWidth, h: window.innerHeight })
+
+  useEffect(() => {
+    if (!isTouchDevice) return
+    const onResize = () => setViewport({ w: window.innerWidth, h: window.innerHeight })
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  const { canvasWidth, canvasHeight } = useMemo(() => {
+    if (!isTouchDevice) {
+      return { canvasWidth: mapWidth, canvasHeight: mapHeight }
+    }
+    const vw = Math.min(viewport.w, mapWidth)
+    const vh = Math.min(viewport.h - TOUCH_UI_HEIGHT, mapHeight)
+    return { canvasWidth: vw, canvasHeight: vh }
+  }, [mapWidth, mapHeight, viewport])
 
   useEffect(() => {
     if (shouldResetInterpolation(prevStateRef.current, gameState)) {
@@ -42,7 +76,12 @@ const GameCanvas = ({ gameState, tileMap }: GameCanvasProps) => {
   const canvasRef = useCanvas((ctx) => {
     const state = gameStateRef.current
     const renderPosition = getInterpolatedPosition(interpRef.current, state.direction, state.moving)
-    renderFrame(ctx, tileMapRef.current, state, renderPosition, collectedSetRef.current)
+
+    const cameraOffset = isTouchDevice
+      ? calcCameraOffset(renderPosition, canvasWidth, canvasHeight, mapWidth, mapHeight)
+      : { x: 0, y: 0 }
+
+    renderFrame(ctx, tileMapRef.current, state, renderPosition, collectedSetRef.current, cameraOffset)
   }, canvasWidth, canvasHeight)
 
   return <canvas ref={canvasRef} style={{ display: 'block', imageRendering: 'pixelated' }} />
