@@ -1,0 +1,53 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.container {
+  @include mobile-container;
+  padding-top: 24px;
+  min-height: 100dvh;
+}
+
+.battleLog {
+  @include card;
+}
+
+.title {
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.turns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.turn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.player {
+  background: rgba($accent, 0.1);
+}
+
+.enemy {
+  background: rgba(#94a3b8, 0.1);
+}
+
+.turnNum {
+  color: $text-secondary;
+  min-width: 28px;
+}
+
+.damage {
+  margin-left: auto;
+  font-weight: 600;
+  color: $accent-light;
+}

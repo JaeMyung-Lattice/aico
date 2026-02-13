@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String          @id @default(uuid())
+  supabaseId        String          @unique
+  nickname          String?
+  gold              Int             @default(100)
+  tutorialCompleted Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  monsters          Monster[]
+  equipment         Equipment[]
+  energyLogs        EnergyLog[]
+  dungeonResults    DungeonResult[]
+}
+
+model Monster {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  name        String?
+  element     String
+  personality String
+  atk         Float       @default(5)
+  def         Float       @default(5)
+  hp          Float       @default(5)
+  agi         Float       @default(5)
+  intStat     Float       @default(5)
+  rec         Float       @default(5)
+  growthStage String      @default("Egg")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  equipment   Equipment[]
+}
+
+model Equipment {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  monsterId String?
+  monster   Monster? @relation(fields: [monsterId], references: [id])
+  name      String
+  slot      String
+  grade     String
+  statType  String
+  statValue Float
+  createdAt DateTime @default(now())
+}
+
+model EnergyLog {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  activity String
+  usedAt   DateTime @default(now())
+}
+
+model DungeonResult {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  floor      Int
+  difficulty String
+  result     String
+  goldReward Int
+  createdAt  DateTime @default(now())
+}
