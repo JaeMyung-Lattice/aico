@@ -4,7 +4,14 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env['SUPABASE_URL'] ?? ''
 const supabaseServiceKey = process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? ''
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+console.log('Auth ENV:', {
+  SUPABASE_URL: supabaseUrl ? 'SET' : 'MISSING',
+  SUPABASE_SERVICE_ROLE_KEY: supabaseServiceKey ? 'SET' : 'MISSING',
+})
+
+const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null
 
 export interface AuthRequest extends Request {
   userId?: string
@@ -17,6 +24,11 @@ export const authMiddleware = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
+    if (!supabase) {
+      res.status(500).json({ error: 'Supabase not configured' })
+      return
+    }
+
     const authHeader = req.headers.authorization
     if (!authHeader?.startsWith('Bearer ')) {
       res.status(401).json({ error: 'Missing authorization token' })
