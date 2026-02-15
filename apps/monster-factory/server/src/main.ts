@@ -30,7 +30,12 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
 })
 
-registerRoutes(app)
+try {
+  registerRoutes(app)
+  console.log('Routes registered successfully')
+} catch (err) {
+  console.error('Failed to register routes:', err)
+}
 registerEvents(io)
 
 const PORT = process.env['PORT'] ?? 4002
