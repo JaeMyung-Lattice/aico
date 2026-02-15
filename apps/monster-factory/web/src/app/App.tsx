@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom'
 import { router } from './Router'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useMonsterStore } from '@/stores/useMonsterStore'
+import { api } from '@/lib/api'
 
 const App = () => {
   const { initialize, user } = useAuthStore()
@@ -14,7 +15,9 @@ const App = () => {
 
   useEffect(() => {
     if (user) {
-      fetchMonster()
+      api.get('/auth/me').then(() => {
+        fetchMonster()
+      })
     }
   }, [user, fetchMonster])
 
